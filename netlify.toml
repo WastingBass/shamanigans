@@ -1,0 +1,22 @@
+# Shamanigans is a single pre-built page: nothing to compile on Netlify's side.
+# The committed dist/ folder is what gets served.
+[build]
+  publish = "dist"
+  command = ""
+
+# The service worker and the shell must never be served stale, or the
+# phone keeps running an old build after a deploy.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"

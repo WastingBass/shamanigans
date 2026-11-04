@@ -1,0 +1,14 @@
+# Personal data never belongs in the repo — backups hold real tasks and habits
+seed*.json
+*backup*.json
+bk/
+bk2/
+bk3/
+restore/
+
+# Local test output
+*.png
+!dist/*.png
+preview.html
+node_modules/
+.DS_Store
