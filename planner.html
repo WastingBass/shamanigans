@@ -67,21 +67,29 @@
 :root[data-pg="settings"]{--ah:220} :root[data-pg="notes"]{--ah:320}
 *{box-sizing:border-box}
 /* phone: no double-tap zoom, no text highlighting, no long-press callout */
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;height:100%}
 body{
   background:var(--bg); color:var(--fg); font:13px/1.42 var(--body);
   touch-action:manipulation; -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
-  padding-block:calc(16px + env(safe-area-inset-top,0px)) 0;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
+  /* The document itself never scrolls, so the bar at the bottom is a fixed
+     part of the frame rather than something painted over a moving page.
+     Rubber-banding can no longer drag it around. */
+  height:100%; overflow:hidden; overscroll-behavior:none;
+  display:flex; flex-direction:column;
 }
 button,input,select,textarea{font:inherit;color:inherit}
 input,textarea,.selectable{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 button{cursor:pointer;background:none;border:0;padding:0;text-align:left}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 svg{display:block}
-.wrap{max-width:740px;margin:0 auto;padding-bottom:calc(var(--navh,62px) + 10px);position:relative}
+.wrap{
+  flex:1 1 auto; min-height:0; width:100%; max-width:740px; margin:0 auto; position:relative;
+  overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
+  padding-block:calc(16px + env(safe-area-inset-top,0px)) 10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
 
 /* laptop: nav moves to a sidebar and the page spreads out */
 #side{display:none}
@@ -260,7 +268,8 @@ h1{margin:0;font:700 23px/1.1 var(--display);letter-spacing:-.01em;text-wrap:bal
 .sec.warn{color:var(--warn)}
 .sec .cv{opacity:.6;font-size:9px}
 .sec .rt{display:flex;align-items:center;gap:8px;flex:none}
-.sec .addb{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:var(--accent);background:var(--soft);font-size:14px;line-height:1;font-weight:600}
+.sec .addb{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--accent);background:var(--soft);font-size:18px;line-height:1;font-weight:600}
+.sec .rt{gap:6px}
 .sec button.l:hover{color:var(--fg)}
 .dot{width:8px;height:8px;border-radius:50%;background:hsl(var(--h,200) var(--cat-s) var(--cat-l));display:inline-block;flex:none}
 .dot.none{background:var(--muted)}
@@ -370,7 +379,38 @@ ul{list-style:none;margin:0;padding:0}
 .ordline{position:absolute;left:8px;right:8px;height:2px;background:var(--accent);border-radius:2px;z-index:8;pointer-events:none;
   transition:top .13s cubic-bezier(.4,0,.2,1),left .13s cubic-bezier(.4,0,.2,1)}
 .ordline.ind{left:36px}
+.rcal{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;color:var(--muted)}
+.rcal svg{width:17px;height:17px}
+.rcal.set{color:var(--accent);background:var(--soft)}
+/* choosing a day for a task */
+.pickbar{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:7px 10px;border-radius:10px;
+  background:var(--accent);color:var(--accent-fg);font:600 12.5px var(--body)}
+.pickbar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pickbar button{color:var(--accent-fg);text-decoration:underline;font-weight:600;font-size:12px}
+/* the year */
+.year{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 8px}
+.ymo{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 5px 7px}
+.ymh{display:block;width:100%;text-align:center;font:700 11.5px var(--body);color:var(--accent);padding:1px 0 4px}
+.ygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.yd{aspect-ratio:1;display:grid;place-items:center;font-size:8px;color:var(--muted);border-radius:3px;line-height:1}
+.yd.off{visibility:hidden}
+.yd.has{background:color-mix(in srgb,var(--accent) 24%,transparent);color:var(--fg);font-weight:700}
+.yd.td{outline:1.5px solid var(--accent);outline-offset:-1px;color:var(--accent);font-weight:700}
+@media (min-width:900px){ .year{grid-template-columns:repeat(4,1fr);gap:14px} .yd{font-size:10px} }
+.lifted{opacity:.62;transform-origin:center;box-shadow:0 8px 22px rgba(0,0,0,.18);position:relative;z-index:30}
 li.task.settle{animation:settle .34s cubic-bezier(.33,1,.68,1)}
+/* a task you have put on today reads green at a glance */
+.task.ontoday{background:color-mix(in srgb,#34c759 13%,var(--surface))}
+:root[data-theme="dark"] .task.ontoday{background:color-mix(in srgb,#34c759 16%,var(--surface))}
+/* and finishing one is worth a half second */
+li.task.justdone{animation:justdone .5s ease both}
+li.task.justdone .t{animation:strike .4s ease both}
+@keyframes justdone{
+  0%{background:color-mix(in srgb,#34c759 34%,var(--surface))}
+  100%{background:transparent}}
+@keyframes strike{0%{opacity:1}55%{opacity:.5}100%{opacity:.45}}
+.pill.sm.resch{font-size:10.5px;padding:3px 7px;color:var(--warn);border-color:var(--warn)}
+@media (prefers-reduced-motion:reduce){li.task.justdone,li.task.justdone .t{animation:none}}
 @keyframes settle{
   0%{background:color-mix(in srgb,var(--accent) 22%,transparent);transform:scale(.985)}
   100%{background:transparent;transform:none}}
@@ -432,29 +472,33 @@ li.task.settle{animation:settle .34s cubic-bezier(.33,1,.68,1)}
 .calside.sheet .empty{padding:14px 2px}
 .chips.pad,.hintline.pad{padding:2px 2px 6px}
 /* phone calendar: one bar, and the page tools float in its top-right corner */
-.calbar{display:flex;align-items:center;gap:4px;margin:0 0 5px;min-height:34px;padding-right:72px}
-.calbar .mid{flex:1;min-width:0;text-align:left;font:600 13px var(--body);line-height:1.15;
+/* the settings and theme icons used to float over the right of this bar and it
+   reserved room for them; they live in More now, so the row uses the full width */
+.calbar{display:flex;align-items:center;gap:5px;margin:0 0 5px;min-height:40px;padding:0}
+.calbar .mid{flex:1;min-width:0;text-align:center;font:600 13.5px var(--body);line-height:1.15;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .calbar .mid small{display:block;font-weight:400;color:var(--muted);font-size:10px}
-.calbar .nv{width:28px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;
-  font-size:16px;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
+.calbar .nv{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:9px;
+  font-size:18px;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
 .calbar .nv.acc{color:var(--accent)}
 .calbar .nv.today{font-size:20px;color:var(--accent)}
 .seg3{display:flex;flex:none;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.seg3 button{width:28px;height:30px;display:grid;place-items:center;font:600 11.5px var(--body);color:var(--muted)}
+.seg3 button{width:32px;height:34px;display:grid;place-items:center;font:700 13px var(--body);color:var(--muted)}
 .seg3 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 @media (max-width:899px){
   /* the calendar prints its own date, so the page title is dead weight here */
-  :root[data-pg="cal"] body,body:has(#view .calbar){padding-block-start:max(6px,env(safe-area-inset-top,0px))}
+  :root[data-pg="cal"] .wrap,.wrap:has(#view .calbar){padding-block-start:max(6px,env(safe-area-inset-top,0px))}
   /* and the grid runs to both edges: only the bar and the sheet keep a margin */
-  :root[data-pg="cal"] body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  :root[data-pg="cal"] .wrap{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   :root[data-pg="cal"] .top{position:absolute;top:0;right:12px;margin:0;min-height:0;z-index:7}
   :root[data-pg="cal"] .top .eyebrow,:root[data-pg="cal"] .top h1{display:none}
   /* settings and the theme switch live in Settings, not over the grid */
   :root[data-pg="cal"] .top .tools{display:none}
+  /* every page: these live in More \u2192 Settings now */
+  .top .tools{display:none}
   :root[data-pg="cal"] .wrap{position:relative}
   :root[data-pg="cal"] .devbar{margin:2px 12px 0}
-  :root[data-pg="cal"] .calbar{padding-left:12px;padding-right:84px}
+  :root[data-pg="cal"] .calbar{padding-left:10px;padding-right:10px}
   :root[data-pg="cal"] .note,:root[data-pg="cal"] .hintline{margin-left:12px;margin-right:12px}
   :root[data-pg="cal"] .grid{border-left:0;border-right:0;border-radius:0}
   :root[data-pg="cal"] .month{border-left:0;border-right:0;border-radius:0}
@@ -630,6 +674,12 @@ body.dragging *{cursor:grabbing!important}
   .hcard:not(.big) .wkstrip i{height:10px;border-radius:3px}
   .hcard:not(.big) .wkstrip i b{display:none}
   .hcard:not(.big) .wkstrip i.td{outline-width:1.5px;outline-offset:0}
+  .hcard:not(.big) .tick2{margin-left:9px}
+  .hcard:not(.big) .dots{margin-left:4px}
+}
+/* opened out, the tick sits up by the \u22ef rather than under the chart */
+.hcard.big>.tick2,.hcard.big>.hv{position:absolute;top:11px;right:42px}
+@media (max-width:899px){
 }
 .hcard .ht{font:700 14px var(--body);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hcard .hv{font:700 13px var(--body);font-variant-numeric:tabular-nums;opacity:.95;white-space:nowrap}
@@ -783,12 +833,12 @@ body.dragging *{cursor:grabbing!important}
 .mrow .mt small{color:var(--muted);font-size:11px}
 .mrow .ch{color:var(--muted);flex:none}
 
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+nav{position:relative;flex:0 0 auto;background:var(--surface);border-top:1px solid var(--line);
   padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5}
 nav div{max-width:740px;margin:0 auto;display:flex}
-nav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;font-size:10px;font-weight:500;color:var(--muted);border-radius:9px;touch-action:none}
-nav button svg{width:18px;height:18px}
+nav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;font-size:11px;font-weight:500;color:var(--muted);border-radius:9px;touch-action:none}
+nav button svg{width:23px;height:23px}
 nav button[aria-current="page"]{color:var(--accent);font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -1086,6 +1136,8 @@ var LOOKS=[
   ['sketch','Sketchbook',['#2E4A7D','#DCE4F2','#FBF7EE']]
 ];
 var MONN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var CALICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>';
+var pickDue=null;   /* a task waiting for you to choose its day on the calendar */
 var DOWN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DL=['S','M','T','W','T','F','S'];
 var DOWFULL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 var MONFULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1099,9 +1151,12 @@ var set={cats:DEFAULT_CATS.slice(),windows:clone(DEFAULT_WIN),trips:[],cap:3,loo
 var ready=false, db=null, readOnly=false, chains={};
 var PAGELIST=['today','cal','habits','tasks','more','goals','rewards','track','settings','notes'];
 var page=store('lp.page')||'cal'; if(page==='plan'||page==='dash') page='cal'; if(PAGELIST.indexOf(page)<0) page='cal';
-var tab=store('lp.tasktab')||'today', habTab='build', calView=store('lp.calview')||'day', calDate=today;
+var tab=store('lp.tasktab')||'today';
+if(tab!=='today'&&tab!=='lists'&&tab!=='archive') tab='today';
+var habTab='build', calView=store('lp.calview')||'day', calDate=today;
 var openId=null, confirmDel=null, refocus=null, picked=null, modal=null, showDrawer=true, addingCat=null, addingHab=null, catEdit=null;
 var habBig={}; try{habBig=JSON.parse(store('lp.habbig')||'{}')||{}}catch(e){habBig={}}
+var peekHab=null;   /* opened out only while your finger is down */
 var isPhone=function(){return window.innerWidth<900};
 var sheetTab=store('lp.sheettab')||'tasks';
 if(sheetTab!=='tasks'&&sheetTab!=='habits') sheetTab='tasks';   /* rewards and blocks are gone */
@@ -1232,15 +1287,16 @@ function rowHTML(t,o){
   if(t.prio===3) bits.push('<span class="hi">High</span>');
   if(t.done&&o.doneDate&&t.doneAt) bits.push('Done '+dueLabel(iso(new Date(t.doneAt))));
   var on=t.plan===today;
-  var right=o.plan?'<span class="rt2"><button class="todo'+(on?' on':'')+'" data-act="plan" aria-pressed="'+on+'" aria-label="'+(on?'Planned for today':'Plan for today')+'" title="Today"></button>'+
-      '<button class="rdots" data-act="open" aria-label="Edit '+esc(t.title)+'" aria-expanded="'+open+'">\u22ef</button></span>'
+  var resch=o.resch?'<button class="pill sm resch" data-act="totoday" aria-label="Move '+esc(t.title)+' to today">\u2192 Today</button>':'';
+  var right=o.plan?'<span class="rt2">'+resch+'<button class="todo'+(on?' on':'')+'" data-act="plan" aria-pressed="'+on+'" aria-label="'+(on?'Planned for today':'Plan for today')+'" title="Today"></button>'+
+      '<button class="rcal'+(t.due?' set':'')+'" data-act="pickdue" aria-label="Pick a date for '+esc(t.title)+'" title="Pick a date">'+CALICO+'</button></span>'
     :o.pick?'<button class="pill sm '+(picked&&picked.id===t.id?'on':'')+'" data-act="pick">'+(picked&&picked.id===t.id?'Picked':'Place')+'</button>'
     :'<span></span>';
   /* the twisty sits outside .body: a button cannot be nested inside a button */
   var twisty=kids?'<button class="tw" data-act="subfold" aria-label="'+(isOpenSub(t.id)?'Hide':'Show')+' steps" aria-expanded="'+isOpenSub(t.id)+'">'+(isOpenSub(t.id)?'\u25be':'\u25b8')+'</button>':'';
-  return '<li class="task '+(t.done?'done ':'')+(c.none?'none-cat ':'')+(depth?'kid ':'')+(kids?'hastw ':'')+(picked&&picked.id===t.id?'sel':'')+'" data-id="'+t.id+'" data-kind="task" data-depth="'+depth+'" style="--h:'+c.hue+(depth?';--ind:'+(depth*20)+'px':'')+'">'+
+  return '<li class="task '+(t.done?'done ':'')+(on&&!t.done?'ontoday ':'')+(c.none?'none-cat ':'')+(depth?'kid ':'')+(kids?'hastw ':'')+(picked&&picked.id===t.id?'sel':'')+'" data-id="'+t.id+'" data-kind="task" data-depth="'+depth+'" style="--h:'+c.hue+(depth?';--ind:'+(depth*20)+'px':'')+'">'+
     '<button class="chk" data-act="toggle" aria-label="'+(t.done?'Mark not done':'Mark done')+'" aria-pressed="'+!!t.done+'"></button>'+
-    (o.plan?'<span class="body flat"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</span>'
+    (o.plan?'<button class="body flat" data-act="open" aria-expanded="'+open+'"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</button>'
           :'<button class="body" data-act="open" aria-expanded="'+open+'"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</button>')+right+twisty+
     (open?panelHTML(t):'')+'</li>';
 }
@@ -1567,6 +1623,23 @@ function sizeGrid(){
   var side=$('.calside');
   if(side&&!side.classList.contains('sheet')) side.style.maxHeight=(window.innerWidth>=1100?avail+'px':'');
 }
+function yearGrid(date){
+  var y=fromIso(date).getFullYear(), plans={};
+  arr(tasks).forEach(function(t){ if(t.plan&&!t.done) plans[t.plan]=(plans[t.plan]||0)+1 });
+  arr(tasks).forEach(function(t){ if(t.due&&!t.done) plans[t.due]=(plans[t.due]||0)+1 });
+  var h='<div class="year">';
+  for(var m=0;m<12;m++){
+    var first=new Date(y,m,1), start=addDays(first,-((first.getDay()+6)%7));
+    h+='<div class="ymo"><button class="ymh" data-act="gomonth" data-d="'+iso(first)+'">'+MONN[m]+'</button><div class="ygrid">';
+    for(var i=0;i<42;i++){
+      var s=iso(addDays(start,i));
+      if(fromIso(s).getMonth()!==m){ h+='<i class="yd off"></i>'; continue }
+      h+='<button class="yd'+(s===today?' td':'')+(plans[s]?' has':'')+'" data-act="goday" data-d="'+s+'">'+fromIso(s).getDate()+'</button>';
+    }
+    h+='</div></div>';
+  }
+  return h+'</div>';
+}
 function monthGrid(date){
   var d=fromIso(date), first=new Date(d.getFullYear(),d.getMonth(),1), start=addDays(first,-((first.getDay()+6)%7));
   var h='<div class="month">'+['M','T','W','T','F','S','S'].map(function(x){return '<div class="hd">'+x+'</div>'}).join('');
@@ -1583,22 +1656,25 @@ function monthGrid(date){
 }
 PAGES.cal=function(){
   var phone=isPhone();
-  var views=[['day','Day','D'],['week','Week','W'],['month','Month','M']];
+  var views=[['day','Day','D'],['week','Week','W'],['month','Month','M'],['year','Year','Y']];
   var mid = calView==='day' ? (phone?shortDate(calDate):longDate(calDate))
     : calView==='week' ? 'Week of '+fromIso(monOf(calDate)).getDate()+' '+MONN[fromIso(monOf(calDate)).getMonth()]
+    : calView==='year' ? String(fromIso(calDate).getFullYear())
     : MONFULL[fromIso(calDate).getMonth()]+' '+fromIso(calDate).getFullYear();
   var sub = calView==='day' ? dur(windowMins(set.windows,calDate))+' yours · '+dur(bookedMins(arr(blocks),set.windows,calDate))+' blocked' : '';
   var h;
   if(phone){
     /* one bar instead of three rows: every pixel saved is calendar */
-    h='<div class="calbar">'+
+    h=(pickDue&&tasks[pickDue]?'<div class="pickbar"><span>Pick a day for \u201c'+esc(tasks[pickDue].title)+'\u201d</span>'+
+        '<button data-act="pickcancel">Cancel</button></div>':'')+
+      '<div class="calbar">'+
       '<button class="nv" data-act="calmove" data-n="-1" aria-label="Previous">‹</button>'+
       '<div class="mid">'+esc(mid)+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'+
       '<button class="nv" data-act="calmove" data-n="1" aria-label="Next">›</button>'+
       (calDate!==today?'<button class="nv today" data-act="caltoday" aria-label="Back to today">•</button>':'')+
       '<div class="seg3" role="group" aria-label="Calendar view">'+views.map(function(v){
         return '<button data-act="calview" data-v="'+v[0]+'" aria-label="'+v[1]+'" aria-pressed="'+(calView===v[0])+'">'+v[2]+'</button>'}).join('')+'</div>'+
-      (calView!=='month'?'<button class="nv acc" data-act="newblk" aria-label="New time block">⊞</button>':'')+
+      (calView==='month'||calView==='year'?'':'<button class="nv acc" data-act="newblk" aria-label="New time block">⊞</button>')+
       '</div>';
   } else {
     h='<div class="tabs2" role="group" aria-label="Calendar view">'+views.map(function(v){
@@ -1611,6 +1687,7 @@ PAGES.cal=function(){
       (calView!=='month'?'<button class="acc" data-act="newblk" aria-label="New time block" title="New time block">⊞</button>':'')+
       '<button data-act="calmove" data-n="1" aria-label="Next">›</button></div></div>';
   }
+  if(calView==='year') return h+yearGrid(calDate);
   if(calView==='month') return h+monthGrid(calDate);
   var grid = calView==='day' ? dayGrid(calDate) : weekGrid(calDate);
   var notes=tripNote(calDate);
@@ -1717,7 +1794,9 @@ PAGES.habits=function(){
   var active=all.filter(function(h){return h.active}).length;
   var h=exNote()+tripNote(today);
   if(active>(set.cap||3)) h+='<div class="note alert"><span>⚠️ '+active+' running at once — three is usually the most that sticks</span></div>';
-  var ord=function(a,b){return (b.active?1:0)-(a.active?1:0)||a.created-b.created};
+  var ord=function(a,b){
+    var x=a.hord==null?1e9:a.hord, y=b.hord==null?1e9:b.hord;
+    return (b.active?1:0)-(a.active?1:0)||x-y||a.created-b.created};
   h+=secAdd('🌱 Building',build.length,'build');
   if(addingHab==='build') h+='<form class="addform" id="habform" data-kind="build"><input id="newhab" placeholder="Habit to build" aria-label="New habit to build" maxlength="60" autocomplete="off"><button>Add</button></form>';
   h+=build.length?habGroups(build,ord):'<p class="empty">🌱 Tap + to add one</p>';
@@ -1804,7 +1883,7 @@ function vizLine(h,n){
 function habCard(h){
   var c=catOf(h.cat), hue=(h.hue==null?c.hue:h.hue), open=openId===h.id, done=hval(h,today)>0, slip=(h.slips||{})[today]!=null;
   /* a week at a glance; hold the card and it opens out to a month */
-  var big=!!habBig[h.id];
+  var big=!!habBig[h.id]||peekHab===h.id;
   var viz = big
     ? (h.view==='bars'?vizBars(h,28) : h.view==='line'?vizLine(h,28) : vizMonth(h))
     : wkStrip(h);
@@ -1827,9 +1906,9 @@ function habCard(h){
   return '<div class="hcard'+(h.active?'':' off')+(big?' big':'')+'" data-id="'+h.id+'" data-kind="habit" style="--h:'+hue+'">'+
     '<div class="hc1"><span class="em">'+(h.emoji||(h.kind==='build'?'🌱':'🚫'))+'</span>'+
     '<span class="ht">'+esc(h.title)+(h.active?'':' · paused')+'</span>'+
-    (val?'<span class="hv">'+val+'</span>':'')+right+
+    (val?'<span class="hv">'+val+'</span>':'')+
     '<button class="dots" data-act="habopen" aria-label="Edit" aria-expanded="'+open+'">⋯</button></div>'+
-    viz+'<div class="hfoot">'+foot+'</div></div>'+
+    viz+right+'<div class="hfoot">'+foot+'</div></div>'+
     (open?'<div class="hpanel" data-id="'+h.id+'" data-kind="habit">'+habPanel(h)+'</div>':'');
 }
 function schedText(h){
@@ -1891,9 +1970,10 @@ function pctLast4(h){
 /* on the tasks page a row is a name and a date: the list it sits in IS its category */
 function slimPanel(t){
   return '<div class="panel slim">'+
-    '<input class="f-title" value="'+esc(t.title)+'" aria-label="Task name">'+
-    '<div class="fl"><label style="flex:1">Due<input type="date" class="f-due" value="'+esc(t.due||'')+'"></label></div>'+
-    '<div class="row-end"><button class="link danger" data-act="delete">'+(confirmDel===t.id?'Tap again to delete':'Delete')+'</button></div></div>';
+    '<input class="f-title" value="'+esc(t.title)+'" aria-label="Task name" enterkeyhint="done">'+
+    '<div class="row-end">'+
+      '<button class="link danger" data-act="delete">'+(confirmDel===t.id?'Tap again to delete':'Delete')+'</button>'+
+      '<button class="link" data-act="open">Done</button></div></div>';
 }
 /* ---------- task order and nesting (up to two levels under a top task) ---------- */
 var MAXDEPTH=2;
@@ -1919,6 +1999,11 @@ function treeFor(items,pool){
   })(null,0);
   return out;
 }
+function firstOrd(parent,cat){
+  var sibs=arr(tasks).filter(function(t){
+    return parent? t.parent===parent : (!t.parent&&t.cat===cat)});
+  return sibs.reduce(function(m,t){return Math.min(m,ordOf(t))},0)-1;
+}
 function nextOrd(parent,cat){
   var sibs=arr(tasks).filter(function(t){
     return parent? t.parent===parent : (!t.parent&&t.cat===cat)});
@@ -1929,6 +2014,13 @@ function renumber(ids){
   ids.forEach(function(id,i){
     var t=tasks[id]; if(t&&ordOf(t)!==i) editTask(id,function(x){x.ord=i});
   });
+}
+function foldHead(key,label,n,hue,none){
+  var o=isCatOpen(key);
+  return '<h2 class="sec"><span class="l">'+
+    '<button class="ctw'+(o?' open':'')+'" data-act="cattw" data-c="'+esc(key)+'" aria-expanded="'+o+'" aria-label="'+(o?'Collapse ':'Expand ')+esc(label)+'"></button>'+
+    (hue!==undefined?'<i class="dot '+(none?'none':'')+'" style="--h:'+hue+'"></i>':'')+
+    esc(label)+'</span><span class="count">'+n+'</span></h2>';
 }
 function catHead(c,n,depth){
   var co=isCatOpen(c.id);
@@ -1947,9 +2039,7 @@ function catEditor(c){
     '<div class="swatches">'+HUES2.map(function(x){
       return '<button class="swatch" data-act="cathue2" data-x="'+x+'" style="--sh:'+x+'" aria-pressed="'+(nearestHue(c.hue)===x)+'" aria-label="Colour"></button>'
     }).join('')+'</div>'+
-    '<label class="fl">Nest under<select class="c-parent" style="flex:1;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:12px">'+
-      '<option value="">\u2014 top level \u2014</option>'+parents.map(function(x){
-        return '<option value="'+esc(x.id)+'"'+(c.parent===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label>'+
+    '<p class="hintline">Hold the category name to drag it into a new place.</p>'+
     '<div class="row-end"><button class="link danger" data-act="catdel">Delete category</button>'+
     '<button class="link" data-act="catedit" data-c="">Done</button></div></div>';
 }
@@ -1980,31 +2070,24 @@ function catBlock(c,map,depth){
 }
 PAGES.tasks=function(){
   var all=arr(tasks), open=all.filter(function(t){return !t.done}), done=all.filter(function(t){return t.done});
-  /* "now" is anything you put on today's plate, plus anything that slipped past it */
   var late=function(t){return (t.plan&&t.plan<today)||(t.due&&t.due<today)};
   var now=function(t){return t.plan===today||(t.due&&t.due===today)||late(t)};
-  var tdy=open.filter(now), pipe=open.filter(function(t){return !now(t)});
-  var byTime=function(a,b){
-    var x=a.at==null?9999:a.at, y=b.at==null?9999:b.at;
-    return x-y||(b.prio-a.prio)||(a.created-b.created);
-  };
-  var TABS=[['today','Today',tdy.length],['pipe','Pipeline',pipe.length],
-            ['lists','Lists',null],['archive','Done',done.length]];
+  var tdy=open.filter(now);
+  var TABS=[['today','Today',tdy.length],['lists','Lists',open.length],['archive','Done',done.length]];
   var h=exNote()+'<div class="tabs2" role="group" aria-label="View">'+TABS.map(function(t){
     return '<button data-act="tab" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+
-      esc(t[1])+(t[2]==null?'':' <span class="tn">'+t[2]+'</span>')+'</button>'}).join('')+'</div>';
+      esc(t[1])+' <span class="tn">'+t[2]+'</span></button>'}).join('')+'</div>';
 
   if(tab==='today'){
-    var over=tdy.filter(late).sort(byDue), due=tdy.filter(function(t){return !late(t)}).sort(byTime);
-    if(!tdy.length) h+='<p class="empty">\u2600\ufe0f Nothing on today \u2014 pull something over from Pipeline</p>';
-    if(over.length) h+=sec('Overdue',over.length,'warn')+list(over,{plan:1,dot:1});
-    if(due.length) h+=sec('Today',due.length)+list(due,{plan:1,dot:1});
-  }
-  else if(tab==='pipe'){
-    if(!pipe.length) h+='<p class="empty">\u2705 Nothing waiting \u2014 the pipeline is clear</p>';
-    else groups(pipe.sort(byDue)).forEach(function(g){
-      h+=sec(g[0].name,g[1].length,'',g[0].hue,g[0].none)+list(g[1],{plan:1});
-    });
+    var over=tdy.filter(late), due=tdy.filter(function(t){return !late(t)});
+    if(!tdy.length) h+='<p class="empty">\u2600\ufe0f Nothing on today \u2014 pull something over from Lists</p>';
+    /* trees, so an indented step folds under its parent here too */
+    if(over.length) h+=sec('Overdue',over.length,'warn')+
+      '<ul class="tasks">'+treeFor(over,over).map(function(r){
+        return rowHTML(r.t,{plan:1,dot:1,resch:1,depth:r.depth,kids:r.kids+((r.t.subs||[]).length?1:0)})+subRows(r.t)}).join('')+'</ul>';
+    if(due.length) h+=sec('Today',due.length)+
+      '<ul class="tasks">'+treeFor(due,due).map(function(r){
+        return rowHTML(r.t,{plan:1,dot:1,depth:r.depth,kids:r.kids+((r.t.subs||[]).length?1:0)})+subRows(r.t)}).join('')+'</ul>';
   }
   else if(tab==='lists'){
     var anyOpen=cats().some(function(c){return isCatOpen(c.id)})||isCatOpen('');
@@ -2017,7 +2100,10 @@ PAGES.tasks=function(){
   else {
     if(!done.length) h+='<p class="empty">\u2014</p>';
     groups(done.sort(function(a,b){return (b.doneAt||0)-(a.doneAt||0)})).forEach(function(g){
-      h+=sec(g[0].name,g[1].length,'',g[0].hue,g[0].none)+list(g[1],{doneDate:1})});
+      var key='done:'+g[0].id;
+      h+=foldHead(key,g[0].name,g[1].length,g[0].hue,g[0].none);
+      if(isCatOpen(key)) h+=list(g[1],{doneDate:1});
+    });
   }
   return h;
 };
@@ -2215,6 +2301,11 @@ PAGES.settings=function(){
       return '<button class="preset" data-act="palette" data-p="'+esc(pl[0])+'" aria-pressed="'+on+'">'+
         '<span class="pn">'+esc(pl[0])+'</span><span class="pr">'+pl[1].map(function(x){
           return '<i style="background:hsl('+x+' 58% 50%)"></i>'}).join('')+'</span></button>'
+    }).join('')+'</div></div>';
+  h+='<div class="setblk"><h3>◑ Light or dark</h3>'+
+    '<div class="seg" role="group" aria-label="Light or dark">'+
+    [['auto','Auto'],['light','Light'],['dark','Dark']].map(function(m){
+      return '<button data-act="mode" data-m="'+m[0]+'" aria-pressed="'+(theme===m[0])+'">'+m[1]+'</button>'
     }).join('')+'</div></div>';
   h+='<div class="setblk"><h3>✨ Themes</h3><div class="presets">'+
     LOOKS.map(function(lk){
@@ -2456,7 +2547,7 @@ function notesDigest(){
 var suppressClick=false;
 function wireGrid(){
   var g=$('.gscroll');
-  if(!g||page!=='cal'||calView==='month') return;
+  if(!g||page!=='cal'||calView==='month'||calView==='year') return;
   var dr=null, timer=null, ghost=null;
   var R0=+g.dataset.r0||0, R1=+g.dataset.r1||1440, SPAN=R1-R0;
   var axisOf=function(el){return el&&el.closest?el.closest('[data-axis]'):null};
@@ -2664,6 +2755,47 @@ function dragGhost(x,y,label,hue){
   el.innerHTML='<span class="gd"><i class="dot" style="--h:'+(hue==null?200:hue)+'"></i>'+esc(label)+'</span>';
   el.style.left=x+'px'; el.style.top=y+'px';
 }
+/* Pick one block out of a list and put it down somewhere else in it.
+   Categories and habit cards are not task rows, so they use this instead. */
+function listDrag(e,sel,hostSel,commit,forced){
+  var host=document.querySelector(hostSel); if(!host) return;
+  var items=[].slice.call(host.querySelectorAll(sel));
+  var el=forced||(e.target.closest&&e.target.closest(sel));
+  if(!el||items.indexOf(el)<0) return;
+  var others=items.filter(function(x){return x!==el});
+  if(!others.length) return;
+  var startY=e.clientY, rect=el.getBoundingClientRect(), before=null;
+  el.classList.add('lifted'); setLock(true);
+  var line=document.createElement('div');
+  line.className='dmark ordline';
+  line.style.cssText='position:fixed;left:'+rect.left+'px;width:'+rect.width+'px';
+  document.body.appendChild(line);
+  var move=function(ev){
+    /* without this the browser treats the drag as a scroll and cancels the pointer */
+    if(ev.cancelable) ev.preventDefault();
+    el.style.transform='translateY('+(ev.clientY-startY)+'px)';
+    before=null;
+    for(var i=0;i<others.length;i++){
+      var r=others[i].getBoundingClientRect();
+      if(ev.clientY<r.top+r.height/2){ before=others[i]; line.style.top=(r.top-3)+'px'; break }
+    }
+    if(!before){ var lr=others[others.length-1].getBoundingClientRect(); line.style.top=(lr.bottom+1)+'px' }
+  };
+  var up=function(){
+    document.removeEventListener('pointermove',move);
+    document.removeEventListener('pointerup',up);
+    document.removeEventListener('pointercancel',up);
+    setLock(false); line.remove();
+    el.classList.remove('lifted'); el.style.transform='';
+    var order=others.slice();
+    order.splice(before?order.indexOf(before):order.length,0,el);
+    commit(order.map(function(x){return x.dataset.cat!=null?x.dataset.cat:x.dataset.id}));
+    paint();
+  };
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',up);
+  document.addEventListener('pointercancel',up);
+}
 function dropClear(){
   document.querySelectorAll('.dmark').forEach(function(x){x.remove()});
 }
@@ -2723,13 +2855,57 @@ document.addEventListener('pointerdown',function(e){
   if(hc&&page==='habits'){
     if(e.target.closest('button')) return;
     lpStart={x:e.clientX,y:e.clientY};
+    var hid=hc.dataset.id, y0=e.clientY, started=false;
     lpTimer=setTimeout(function(){
       lpTimer=null; lpStart=null; buzz();
-      var hid=hc.dataset.id;
-      habBig[hid]=!habBig[hid]; store('lp.habbig',JSON.stringify(habBig));
-      suppressClick=true; setTimeout(function(){suppressClick=false},260);
-      paint();
-    },420);
+      /* take the scroll lock as the card opens: without it the browser starts
+         panning on the next move and cancels the pointer mid-drag */
+      setLock(true);
+      peekHab=hid; suppressClick=true; paint();
+    },340);
+    /* once it is open, sliding the finger picks the card up to reorder it */
+    var hm=function(ev){
+      if(peekHab!==hid||started) return;
+      if(ev.cancelable) ev.preventDefault();
+      if(Math.abs(ev.clientY-y0)<12) return;
+      /* no repaint here: it would swap the card out from under the drag.
+         Close the peek in place and let listDrag own the element. */
+      started=true; peekHab=null;
+      var fresh=document.querySelector('.hcard[data-id="'+hid+'"]');
+      if(!fresh) return;
+      fresh.classList.remove('big');
+      listDrag(ev,'.hcard[data-id]','#view',function(ids){
+        ids.forEach(function(x,i){ editHabit(x,function(hh){hh.hord=i}) });
+      },fresh);
+    };
+    var hu=function(){
+      document.removeEventListener('pointermove',hm); document.removeEventListener('pointerup',hu);
+      document.removeEventListener('pointercancel',hu);
+      setLock(false);
+      if(peekHab===hid){ peekHab=null; paint() }
+      setTimeout(function(){suppressClick=false},80);
+    };
+    document.addEventListener('pointermove',hm);
+    document.addEventListener('pointerup',hu);
+    document.addEventListener('pointercancel',hu);
+    return;
+  }
+  /* a category header, held, lifts the whole category */
+  var sh=e.target.closest&&e.target.closest('.sec[data-cat]');
+  if(sh&&page==='tasks'&&tab==='lists'&&!e.target.closest('button')){
+    var cy0=e.clientY, cgo=false;
+    lpStart={x:e.clientX,y:e.clientY};
+    lpTimer=setTimeout(function(){
+      lpTimer=null; lpStart=null; buzz(); cgo=true;
+      suppressClick=true;
+      listDrag(e,'.catgroup[data-cat]','#view',function(ids){
+        var by={}; cats().forEach(function(c){by[c.id]=c});
+        var next=ids.map(function(x){return by[x]}).filter(Boolean);
+        cats().forEach(function(c){ if(next.indexOf(c)<0) next.push(c) });
+        set.cats=next; putSet();
+      },sh.closest('.catgroup'));
+      setTimeout(function(){suppressClick=false},260);
+    },380);
     return;
   }
   var gr=e.target.closest&&e.target.closest('.grip');
@@ -2895,7 +3071,8 @@ function endItemDrag(e){
   placeAt(d.k,d.id,m,dt);
 }
 document.addEventListener('pointerup',endItemDrag,true);
-document.addEventListener('pointercancel',function(){clearDrag()},true);
+/* only tear down the drag this system actually owns: listDrag runs its own */
+document.addEventListener('pointercancel',function(){ if(idrag) clearDrag() },true);
 
 
 /* ---------- paint ---------- */
@@ -2934,7 +3111,7 @@ function showPage(){
    runs once the data has landed, not before, or there is no grid to scroll */
 var centredKey=null;
 function centreGrid(){
-  var g=$('.gscroll'); if(!g||calView==='month') return;
+  var g=$('.gscroll'); if(!g||calView==='month'||calView==='year') return;
   var r0=+g.dataset.r0||0, r1=+g.dataset.r1||1440, inner=g.scrollHeight;
   var n=new Date(), m=(gridDate()===today)?(n.getHours()*60+n.getMinutes()):8*60;
   var first=null;
@@ -2986,8 +3163,10 @@ view.addEventListener('submit',function(e){
   else if(id==='taskform'){
     var ti=$('#nt'), tv=ti.value.trim(); if(!tv) return;
     var pq=parseQuick(tv), fc=e.target.dataset.c;
-    putTask({id:uid(),title:pq.title,cat:resolveCat(pq.cat)||fc,due:pq.due,plan:pq.due===today?today:null,block:null,
-      prio:pq.prio,done:false,doneAt:null,subs:[],repeat:null,parent:null,created:Date.now(),example:false});
+    var ncat=resolveCat(pq.cat)||fc;
+    putTask({id:uid(),title:pq.title,cat:ncat,due:pq.due,plan:pq.due===today?today:null,block:null,
+      prio:pq.prio,done:false,doneAt:null,subs:[],repeat:null,parent:null,
+      ord:firstOrd(null,ncat),created:Date.now(),example:false});
     ti.value=''; refocus='#nt';
   }
   else if(id==='catform'){
@@ -3025,12 +3204,16 @@ view.addEventListener('click',function(e){
   var sr=b.closest('[data-sid]'), sid=sr&&sr.dataset.sid;
   if(act==='toggle'){
     var was=tasks[id]&&tasks[id].done;
-    if(!was) celebrate(b);
+    if(!was){
+      celebrate(b);
+      var li=b.closest('li.task'); if(li) li.classList.add('justdone');
+    }
     editTask(id,function(t){t.done=!t.done; t.doneAt=t.done?Date.now():null; if(t.done&&openId===id) openId=null;
       if(t.done&&t.repeat&&t.repeat.type&&!t.spawned){t.spawned=true; setTimeout(function(){spawnNext(t)},0)}});
   }
   else if(act==='open'){openId=openId===id?null:id; confirmDel=null; paint()}
   else if(act==='plan') editTask(id,function(t){t.plan=t.plan===today?null:today});
+  else if(act==='totoday') editTask(id,function(t){t.plan=today; if(t.due&&t.due<today) t.due=today; t.rolls=0});
   else if(act==='notoday') editTask(id,function(t){t.plan=null; t.block=null});
   else if(act==='unblock') editTask(id,function(t){t.block=null});
   else if(act==='prio') editTask(id,function(t){t.prio=+b.dataset.p});
@@ -3104,6 +3287,7 @@ view.addEventListener('click',function(e){
     set.cats=cats().map(function(c,i){return {id:c.id,name:c.name,hue:pl[1][i%pl[1].length]}}); putSet();
   }
   else if(act==='look'){ set.look=b.dataset.l; putSet(); applyTheme(); }
+  else if(act==='mode'){ theme=b.dataset.m; store('lp.theme',theme); applyTheme(); paint(); }
   else if(act==='hview') editHabit(id,function(x){x.view=b.dataset.v});
   else if(act==='hsched') editHabit(id,function(h){h.sched.type=b.dataset.s; if(b.dataset.s==='days'&&!(h.sched.days||[]).length) h.sched.days=[1,3,5]});
   else if(act==='hday') editHabit(id,function(h){var d=+b.dataset.d,a=h.sched.days||[];h.sched.days=a.indexOf(d)>=0?a.filter(function(x){return x!==d}):a.concat([d]).sort()});
@@ -3121,12 +3305,25 @@ view.addEventListener('click',function(e){
   else if(act==='calview'){calView=b.dataset.v; store('lp.calview',calView); picked=null; centredKey=null; paint()}
   else if(act==='calmove'){var n=+b.dataset.n;
     calDate= calView==='day'?shift(calDate,n): calView==='week'?shift(calDate,7*n)
+      : calView==='year'?(function(){var d=fromIso(calDate);return iso(new Date(d.getFullYear()+n,0,1))})()
       :(function(){var d=fromIso(calDate);return iso(new Date(d.getFullYear(),d.getMonth()+n,1))})();
     centredKey=null; paint()}
   else if(act==='caltoday'){calDate=today; centredKey=null; paint()}
   else if(act==='zoom'){gZoom=Math.max(0.5,Math.min(4,gZoom*(+b.dataset.z>0?1.3:1/1.3))); store('lp.zoom',String(Math.round(gZoom*100)/100)); sizeGrid()}
-  else if(act==='goday'){calDate=b.dataset.d; calView='day'; store('lp.calview','day'); if(page!=='cal'){page='cal'; showPage()} else paint()}
-  else if(act==='gomonth'){calView='month'; store('lp.calview','month'); page='cal'; showPage()}
+  else if(act==='goday'){
+    if(pickDue){                                   /* choosing a day for a task */
+      var pd=pickDue; pickDue=null;
+      editTask(pd,function(t){t.due=b.dataset.d});
+      page='tasks'; showPage(); return;
+    }
+    calDate=b.dataset.d; calView='day'; store('lp.calview','day'); if(page!=='cal'){page='cal'; showPage()} else paint()}
+  else if(act==='gomonth'){ if(b.dataset.d) calDate=b.dataset.d;
+    calView='month'; store('lp.calview','month'); page='cal'; showPage()}
+  else if(act==='pickdue'){
+    pickDue=id; calView='month'; store('lp.calview','month');
+    calDate=(tasks[id]&&tasks[id].due)||today; centredKey=null; page='cal'; showPage();
+  }
+  else if(act==='pickcancel'){ pickDue=null; page='tasks'; showPage() }
   else if(act==='drawer'){showDrawer=!showDrawer; picked=null; paint()}
   else if(act==='newblk') openModal('block',{});
   else if(act==='pick'){
