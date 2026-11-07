@@ -75,7 +75,8 @@ body{
   /* The document itself never scrolls, so the bar at the bottom is a fixed
      part of the frame rather than something painted over a moving page.
      Rubber-banding can no longer drag it around. */
-  height:100%; overflow:hidden; overscroll-behavior:none;
+  height:100%; height:100dvh;   /* dvh: iOS standalone reports the real screen */
+  overflow:hidden; overscroll-behavior:none;
   display:flex; flex-direction:column;
 }
 button,input,select,textarea{font:inherit;color:inherit}
@@ -86,7 +87,7 @@ svg{display:block}
 .wrap{
   flex:1 1 auto; min-height:0; width:100%; max-width:740px; margin:0 auto; position:relative;
   overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
-  padding-block:calc(16px + env(safe-area-inset-top,0px)) 10px;
+  padding-block:calc(22px + env(safe-area-inset-top,0px)) 10px;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
 }
@@ -335,9 +336,14 @@ ul{list-style:none;margin:0;padding:0}
 .sub-row .chk::before{width:12px;height:12px;border-width:1.6px}
 .sub-row.d span{text-decoration:line-through;opacity:.65}
 .catkid{margin-left:14px;border-left:2px solid var(--line);padding-left:10px}
-.task.kid{padding-left:var(--ind,20px)}
+.task.kid{padding-left:var(--ind,20px);background:color-mix(in srgb,var(--fg) 3.5%,transparent)}
 .task.kid .body .t{font-size:12.5px}
-.task.kid::before{content:"";position:absolute;left:calc(var(--ind,20px) - 11px);top:0;bottom:0;width:2px;background:var(--line);opacity:.75;border-radius:2px}
+/* a spine down the left, and a stub out to each child, so the tree is visible */
+.task.kid::before{content:"";position:absolute;left:calc(var(--ind,20px) - 15px);top:0;bottom:0;width:2px;
+  background:color-mix(in srgb,var(--accent) 55%,transparent);border-radius:2px}
+.task.kid::after{content:"";position:absolute;left:calc(var(--ind,20px) - 15px);top:50%;width:9px;height:2px;
+  background:color-mix(in srgb,var(--accent) 55%,transparent);border-radius:2px}
+.task.hastw>.body .t{font-weight:650}
 .task{position:relative}
 .task .tw{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:24px;height:26px;
   display:grid;place-items:center;color:var(--muted);font-size:11px;line-height:1;z-index:2}
@@ -379,6 +385,27 @@ ul{list-style:none;margin:0;padding:0}
 .ordline{position:absolute;left:8px;right:8px;height:2px;background:var(--accent);border-radius:2px;z-index:8;pointer-events:none;
   transition:top .13s cubic-bezier(.4,0,.2,1),left .13s cubic-bezier(.4,0,.2,1)}
 .ordline.ind{left:36px}
+/* the row slides left to uncover its actions */
+.task{position:relative;overflow:hidden}
+.task>.chk,.task>.body,.task>.rt2,.task>.tw{transform:translateX(var(--sw,0px));transition:transform .18s cubic-bezier(.4,0,.2,1)}
+.task.swiping>.chk,.task.swiping>.body,.task.swiping>.rt2,.task.swiping>.tw{transition:none}
+.task.swiped>.chk,.task.swiped>.body,.task.swiped>.rt2,.task.swiped>.tw{transform:translateX(-132px)}
+.swax{position:absolute;top:0;right:0;bottom:0;width:132px;display:flex;align-items:center;justify-content:flex-end;
+  gap:2px;padding-right:6px;opacity:0;pointer-events:none;transition:opacity .14s}
+.task.swiped .swax{opacity:1;pointer-events:auto}
+.swax button{width:38px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--soft);color:var(--muted);font-size:15px}
+.swax button svg{width:17px;height:17px}
+.swax button.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.swax button.del{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent);font-size:13px;width:auto;padding:0 9px}
+/* typing a title in place */
+.body.flat.editing{padding:4px 4px 4px 0}
+.t-inline{width:100%;background:var(--bg);border:1.5px solid var(--accent);border-radius:8px;padding:6px 8px;font:600 13px var(--body);color:var(--fg)}
+.subc{font-weight:600}
+.dueflag{width:16px;height:16px;display:grid;place-items:center;color:var(--accent);opacity:.8}
+.dueflag svg{width:14px;height:14px}
+.subc.all{color:var(--accent)}
+.ong{color:var(--accent);font-weight:600}
+.addform.today{margin:0 0 8px}
 .rcal{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;color:var(--muted)}
 .rcal svg{width:17px;height:17px}
 .rcal.set{color:var(--accent);background:var(--soft)}
@@ -487,7 +514,7 @@ li.task.justdone .t{animation:strike .4s ease both}
 .seg3 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 @media (max-width:899px){
   /* the calendar prints its own date, so the page title is dead weight here */
-  :root[data-pg="cal"] .wrap,.wrap:has(#view .calbar){padding-block-start:max(6px,env(safe-area-inset-top,0px))}
+  :root[data-pg="cal"] .wrap,.wrap:has(#view .calbar){padding-block-start:calc(8px + env(safe-area-inset-top,0px))}
   /* and the grid runs to both edges: only the bar and the sheet keep a margin */
   :root[data-pg="cal"] .wrap{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   :root[data-pg="cal"] .top{position:absolute;top:0;right:12px;margin:0;min-height:0;z-index:7}
@@ -711,6 +738,17 @@ body.dragging *{cursor:grabbing!important}
 .wkstrip i.td{outline:2px solid rgba(255,255,255,.9);outline-offset:1px}
 .vzmonth{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:244px}
 .vzmonth i{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.18)}
+.vzmonth.cal{max-width:268px;gap:3px}
+.vzmonth.cal .vmtitle{grid-column:1/-1;font:700 11px var(--body);opacity:.92;padding:1px 0 2px}
+.vzmonth.cal .vhd{display:grid;place-items:center;font:700 8.5px var(--body);opacity:.6}
+.vzmonth.cal i{display:grid;place-items:center;font-size:8.5px;font-weight:600;color:rgba(255,255,255,.72)}
+.vzmonth.cal i.on{color:rgba(0,0,0,.72)}
+.vzmonth.cal i.pad{background:none}
+.hcrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hcrow .hc-name{flex:1;min-width:110px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-weight:600;font-size:12.5px}
+.hcat.empty{opacity:.55}
+.hgridwrap.drop{border:1px dashed var(--line);border-radius:11px;padding:7px;min-height:42px}
+.empty.sm{font-size:11px;margin:0;padding:3px 2px;opacity:.75}
 .vzmonth i.on{background:#fff}
 .vzmonth i.slip{background:rgba(0,0,0,.34)}
 .vzmonth i.trip{background:rgba(255,255,255,.1)}
@@ -1154,7 +1192,9 @@ var page=store('lp.page')||'cal'; if(page==='plan'||page==='dash') page='cal'; i
 var tab=store('lp.tasktab')||'today';
 if(tab!=='today'&&tab!=='lists'&&tab!=='archive') tab='today';
 var habTab='build', calView=store('lp.calview')||'day', calDate=today;
-var openId=null, confirmDel=null, refocus=null, picked=null, modal=null, showDrawer=true, addingCat=null, addingHab=null, catEdit=null;
+var openId=null, confirmDel=null, refocus=null, picked=null, modal=null, showDrawer=true, addingCat=null, addingHab=null, catEdit=null, editHcats=false;
+var editingId=null;   /* the task whose title is being typed, in place */
+var swipedId=null;    /* the task swiped open to show its actions */
 var habBig={}; try{habBig=JSON.parse(store('lp.habbig')||'{}')||{}}catch(e){habBig={}}
 var peekHab=null;   /* opened out only while your finger is down */
 var isPhone=function(){return window.innerWidth<900};
@@ -1175,6 +1215,20 @@ var gridDate=function(){return calDate};
 
 var arr=function(o){return Object.keys(o).map(function(k){return o[k]})};
 var cats=function(){return set.cats||DEFAULT_CATS};
+/* Habits keep their own list. Until one is saved we derive it from the categories
+   the habits already sit in, so nothing is regrouped behind your back. */
+function hcats(){
+  if(set.hcats&&set.hcats.length) return set.hcats;
+  var used={}; arr(habits).forEach(function(x){ if(x.cat) used[x.cat]=1 });
+  var out=cats().filter(function(c){return used[c.id]}).map(function(c){return {id:c.id,name:c.name,hue:c.hue}});
+  return out.length?out:[{id:'health',name:'Health',hue:140}];
+}
+function hcatOf(id){
+  var l=hcats(); for(var i=0;i<l.length;i++) if(l[i].id===id) return l[i];
+  return {id:'',name:'Other',hue:200,none:true};
+}
+function seedHcats(){ if(!set.hcats||!set.hcats.length){ set.hcats=hcats().map(function(c){
+  return {id:c.id,name:c.name,hue:c.hue}}) } }
 var catOf=function(id){return cats().filter(function(c){return c.id===id})[0]||{id:'',name:'Other',hue:200,none:true}};
 var isLate=function(t){return !t.done&&t.due&&t.due<today};
 var trips=function(){return set.trips||[]};
@@ -1278,30 +1332,40 @@ function rowHTML(t,o){
   var depth=o.depth||0, kids=o.kids||0;
   if(o.dot) bits.push('<span class="cat"><i class="dot '+(c.none?'none':'')+'"></i>'+esc(c.name)+'</span>');
   if(t.due) bits.push('<span class="'+(isLate(t)?'late':'')+'">'+dueLabel(t.due)+'</span>');
+  if(t.ongoing&&!t.done) bits.push('<span class="ong">\u21ba ongoing</span>');
   if(t.rolls&&!t.done) bits.push('<span class="late">rolled '+t.rolls+'×</span>');
   if(t.repeat&&t.repeat.type) bits.push('Repeats '+t.repeat.type);
   if(o.over) bits.push('<span class="hi">beyond today</span>');
   if(t.at!=null) bits.push(hhmm(t.at)+'–'+hhmm(t.at+(t.mins||30)));
   else if(t.block&&blocks[t.block]) bits.push(blocks[t.block].start.slice(0,5)+' '+esc(blocks[t.block].title));
-  if((t.subs||[]).length) bits.push(t.subs.filter(function(s){return s.d}).length+'/'+t.subs.length);
+  var kidTasks=arr(tasks).filter(function(x){return x.parent===t.id});
+  var subDone=(t.subs||[]).filter(function(x){return x.d}).length+kidTasks.filter(function(x){return x.done}).length;
+  var subAll=(t.subs||[]).length+kidTasks.length;
+  if(subAll) bits.push('<span class="subc'+(subDone===subAll?' all':'')+'">'+subDone+'/'+subAll+' done</span>');
   if(t.prio===3) bits.push('<span class="hi">High</span>');
   if(t.done&&o.doneDate&&t.doneAt) bits.push('Done '+dueLabel(iso(new Date(t.doneAt))));
   var on=t.plan===today;
   var resch=o.resch?'<button class="pill sm resch" data-act="totoday" aria-label="Move '+esc(t.title)+' to today">\u2192 Today</button>':'';
   var right=o.plan?'<span class="rt2">'+resch+'<button class="todo'+(on?' on':'')+'" data-act="plan" aria-pressed="'+on+'" aria-label="'+(on?'Planned for today':'Plan for today')+'" title="Today"></button>'+
-      '<button class="rcal'+(t.due?' set':'')+'" data-act="pickdue" aria-label="Pick a date for '+esc(t.title)+'" title="Pick a date">'+CALICO+'</button></span>'
+      (t.due?'<i class="dueflag" title="Has a date">'+CALICO+'</i>':'')+'</span>'
     :o.pick?'<button class="pill sm '+(picked&&picked.id===t.id?'on':'')+'" data-act="pick">'+(picked&&picked.id===t.id?'Picked':'Place')+'</button>'
     :'<span></span>';
   /* the twisty sits outside .body: a button cannot be nested inside a button */
   var twisty=kids?'<button class="tw" data-act="subfold" aria-label="'+(isOpenSub(t.id)?'Hide':'Show')+' steps" aria-expanded="'+isOpenSub(t.id)+'">'+(isOpenSub(t.id)?'\u25be':'\u25b8')+'</button>':'';
-  return '<li class="task '+(t.done?'done ':'')+(on&&!t.done?'ontoday ':'')+(c.none?'none-cat ':'')+(depth?'kid ':'')+(kids?'hastw ':'')+(picked&&picked.id===t.id?'sel':'')+'" data-id="'+t.id+'" data-kind="task" data-depth="'+depth+'" style="--h:'+c.hue+(depth?';--ind:'+(depth*20)+'px':'')+'">'+
+  return '<li class="task '+(t.done?'done ':'')+(on&&!t.done?'ontoday ':'')+(c.none?'none-cat ':'')+(depth?'kid ':'')+(kids?'hastw ':'')+(swipedId===t.id?'swiped ':'')+(picked&&picked.id===t.id?'sel':'')+'" data-id="'+t.id+'" data-kind="task" data-depth="'+depth+'" style="--h:'+c.hue+(depth?';--ind:'+(depth*20)+'px':'')+'">'+
     '<button class="chk" data-act="toggle" aria-label="'+(t.done?'Mark not done':'Mark done')+'" aria-pressed="'+!!t.done+'"></button>'+
-    (o.plan?'<button class="body flat" data-act="open" aria-expanded="'+open+'"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</button>'
+    (editingId===t.id
+      ? '<span class="body flat editing"><input class="t-inline" value="'+esc(t.title)+'" aria-label="Task name" enterkeyhint="done" autocomplete="off"></span>'
+      : o.plan?'<button class="body flat" data-act="rename"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</button>'
           :'<button class="body" data-act="open" aria-expanded="'+open+'"><span class="t">'+esc(t.title)+'</span>'+(bits.length?'<span class="meta">'+bits.join('<b>\u00b7</b>')+'</span>':'')+'</button>')+right+twisty+
+    (o.plan?'<span class="swax" aria-hidden="'+(swipedId!==t.id)+'">'+
+       '<button data-act="pickdue" title="Pick a date">'+CALICO+'</button>'+
+       '<button data-act="ongoing" class="'+(t.ongoing?'on':'')+'" title="Ongoing">\u21ba</button>'+
+       '<button data-act="delete" class="del" title="Delete">'+(confirmDel===t.id?'Sure?':'\u2715')+'</button></span>':'')+
     (open?panelHTML(t):'')+'</li>';
 }
 function habRow(h,o){
-  o=o||{}; var c=catOf(h.cat), done=!!(h.log||{})[today], slip=(h.slips||{})[today]!=null;
+  o=o||{}; var c=hcatOf(h.cat), done=!!(h.log||{})[today], slip=(h.slips||{})[today]!=null;
   var bits=[];
   if(h.kind==='build'){
     var tg=buildTarget(h,today,trips());
@@ -1793,7 +1857,6 @@ PAGES.habits=function(){
   var all=arr(habits), build=all.filter(function(h){return h.kind==='build'}), quit=all.filter(function(h){return h.kind==='quit'});
   var active=all.filter(function(h){return h.active}).length;
   var h=exNote()+tripNote(today);
-  if(active>(set.cap||3)) h+='<div class="note alert"><span>⚠️ '+active+' running at once — three is usually the most that sticks</span></div>';
   var ord=function(a,b){
     var x=a.hord==null?1e9:a.hord, y=b.hord==null?1e9:b.hord;
     return (b.active?1:0)-(a.active?1:0)||x-y||a.created-b.created};
@@ -1804,19 +1867,39 @@ PAGES.habits=function(){
   h+=secAdd('🚫 Removing',quit.length,'quit');
   if(addingHab==='quit') h+='<form class="addform" id="quitform" data-kind="quit"><input id="newquit" placeholder="Habit to drop" aria-label="New habit to remove" maxlength="60" autocomplete="off"><button>Add</button></form>';
   h+=quit.length?habGroups(quit,ord):'<p class="empty">🚫 Nothing here</p>';
+  h+='<div class="hdiv"></div><h2 class="sec"><span class="l">Habit categories</span>'+
+     '<span class="rt"><button class="addb" data-act="hcatedit" aria-label="Edit habit categories">⋯</button></span></h2>';
+  if(editHcats){
+    h+='<div class="cated">'+hcats().map(function(c){
+      return '<div class="hcrow" data-hc="'+esc(c.id)+'">'+
+        '<input class="hc-name" value="'+esc(c.name)+'" aria-label="Category name" maxlength="24">'+
+        '<div class="swatches">'+HUES2.map(function(x){
+          return '<button class="swatch" data-act="hcathue" data-c="'+esc(c.id)+'" data-x="'+x+'" style="--sh:'+x+'" aria-pressed="'+(nearestHue(c.hue)===x)+'" aria-label="Colour"></button>'
+        }).join('')+'</div>'+
+        '<button class="link danger" data-act="hcatdel" data-c="'+esc(c.id)+'">Remove</button></div>';
+    }).join('')+
+    '<form class="addform" id="hcatform"><input id="newhcat" placeholder="New habit category" aria-label="New habit category" maxlength="24"><button>Add</button></form>'+
+    '<p class="hintline">Removing a category leaves its habits in Other.</p></div>';
+  }
   return h;
 }
 /* habits sit under their category inside each section */
 function habGroups(list,ord){
   var map={}; list.forEach(function(h){ (map[h.cat||'']=map[h.cat||'']||[]).push(h) });
-  var order=cats().map(function(c){return c.id}).concat(['']);
+  var order=hcats().map(function(c){return c.id}).concat(['']);
   var out='';
   order.forEach(function(cid){
     var g=map[cid]; if(!g||!g.length) return;
-    var c=catOf(cid);
+    var c=hcatOf(cid);
     out+='<h3 class="hcat"><i class="dot '+(c.none?'none':'')+'" style="--h:'+c.hue+'"></i>'+esc(c.name)+
       '<span class="count">'+g.length+'</span></h3>'+
-      '<div class="hgridwrap">'+g.sort(ord).map(habCard).join('')+'</div>';
+      '<div class="hgridwrap" data-hcat="'+esc(cid)+'">'+g.sort(ord).map(habCard).join('')+'</div>';
+  });
+  /* a landing strip for every other category, so a habit can be dragged into one it is not in yet */
+  hcats().forEach(function(c){
+    if(map[c.id]&&map[c.id].length) return;
+    out+='<h3 class="hcat empty"><i class="dot" style="--h:'+c.hue+'"></i>'+esc(c.name)+'</h3>'+
+      '<div class="hgridwrap drop" data-hcat="'+esc(c.id)+'"><p class="empty sm">drag a habit in, or set it from the habit\u2019s \u22ef \u2192 Category</p></div>';
   });
   return out;
 }
@@ -1837,14 +1920,17 @@ function wkStrip(h){
   return '<div class="wkstrip" aria-label="This week">'+out+'</div>';
 }
 function vizMonth(h){
-  var endMon=monOf(today), out='';
-  for(var w=4;w>=0;w--){
-    for(var i=0;i<7;i++){
-      var d=shift(shift(endMon,-7*w),i), cls=hitOn(h,d);
-      out+='<i class="'+cls+(d===today?' td':'')+'" title="'+d+'"></i>';
-    }
+  /* the calendar month you are actually in, so a gap has a date attached to it */
+  var d=fromIso(today), first=new Date(d.getFullYear(),d.getMonth(),1);
+  var start=addDays(first,-((first.getDay()+6)%7));
+  var out=DL7.map(function(x){return '<b class="vhd">'+x+'</b>'}).join('');
+  for(var i=0;i<42;i++){
+    var sdate=iso(addDays(start,i));
+    if(fromIso(sdate).getMonth()!==d.getMonth()){ out+='<i class="pad"></i>'; continue }
+    out+='<i class="'+hitOn(h,sdate)+(sdate===today?' td':'')+'" title="'+sdate+'">'+fromIso(sdate).getDate()+'</i>';
   }
-  return '<div class="vzmonth" aria-label="Last five weeks">'+out+'</div>';
+  return '<div class="vzmonth cal" aria-label="'+MONFULL[d.getMonth()]+' '+d.getFullYear()+'">'+
+    '<b class="vmtitle">'+MONFULL[d.getMonth()]+'</b>'+out+'</div>';
 }
 /* what a habit recorded that day: a count for quantity habits, 1/0 otherwise */
 function hval(h,d){var v=(h.log||{})[d]; return typeof v==='number'?v:(v?1:0)}
@@ -1881,7 +1967,7 @@ function vizLine(h,n){
     '<circle cx="'+(last*step).toFixed(1)+'" cy="'+(ht-(vals[last]/max)*ht*0.92-2).toFixed(1)+'" r="1.6"/></svg>';
 }
 function habCard(h){
-  var c=catOf(h.cat), hue=(h.hue==null?c.hue:h.hue), open=openId===h.id, done=hval(h,today)>0, slip=(h.slips||{})[today]!=null;
+  var c=hcatOf(h.cat), hue=(h.hue==null?c.hue:h.hue), open=openId===h.id, done=hval(h,today)>0, slip=(h.slips||{})[today]!=null;
   /* a week at a glance; hold the card and it opens out to a month */
   var big=!!habBig[h.id]||peekHab===h.id;
   var viz = big
@@ -1892,7 +1978,7 @@ function habCard(h){
     var tg=buildTarget(h,today,trips());
     val = h.target ? hval(h,today)+'/'+h.target+(h.unit?' '+esc(h.unit):'')
         : (h.sched.type==='week'? weekCount(h,monOf(today))+'/'+tg : (done?'done':''));
-    foot='<span><b>'+streakOf(h,today,trips())+'</b> '+(h.sched.type==='week'?'wk':'day')+' streak</span>'+
+    foot='<span class="streak"><b>'+streakOf(h,today,trips())+'</b> '+(h.sched.type==='week'?'week':'day')+' streak</span>'+
       '<span><b>'+Math.round(pctLast4(h)*100)+'%</b> 4 wks</span>'+
       '<span>'+esc(schedText(h))+'</span>';
   } else {
@@ -1906,9 +1992,10 @@ function habCard(h){
   return '<div class="hcard'+(h.active?'':' off')+(big?' big':'')+'" data-id="'+h.id+'" data-kind="habit" style="--h:'+hue+'">'+
     '<div class="hc1"><span class="em">'+(h.emoji||(h.kind==='build'?'🌱':'🚫'))+'</span>'+
     '<span class="ht">'+esc(h.title)+(h.active?'':' · paused')+'</span>'+
-    (val?'<span class="hv">'+val+'</span>':'')+
-    '<button class="dots" data-act="habopen" aria-label="Edit" aria-expanded="'+open+'">⋯</button></div>'+
-    viz+right+'<div class="hfoot">'+foot+'</div></div>'+
+    (val?'<span class="hv">'+val+'</span>':'')+'</div>'+
+    viz+
+    '<button class="dots" data-act="habopen" aria-label="Edit" aria-expanded="'+open+'">⋯</button>'+
+    right+'<div class="hfoot">'+foot+'</div></div>'+
     (open?'<div class="hpanel" data-id="'+h.id+'" data-kind="habit">'+habPanel(h)+'</div>':'');
 }
 function schedText(h){
@@ -1920,8 +2007,8 @@ function schedText(h){
 }
 var EMOJI=['🌱','🎸','🎧','📚','✍️','🏃','💪','🧘','💧','🥗','😴','☀️','🧹','📞','💰','🎹','🎙️','🖥️','🚴','🏊','🍎','☕','🚬','🍺','📱','🎰','🍪','🛏️','🗣️','🧠'];
 function habPanel(h){
-  var opts=['<option value="">Other</option>'].concat(cats().map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===h.cat?' selected':'')+'>'+esc(c.name)+'</option>'})).join('');
-  var cur=h.emoji||'', hue=(h.hue==null?catOf(h.cat).hue:h.hue);
+  var opts=['<option value="">Other</option>'].concat(hcats().map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===h.cat?' selected':'')+'>'+esc(c.name)+'</option>'})).join('');
+  var cur=h.emoji||'', hue=(h.hue==null?hcatOf(h.cat).hue:h.hue);
   var p='<div class="panel" style="padding:0">'+
     '<input class="h-title" value="'+esc(h.title)+'" aria-label="Habit name">'+
     '<label style="display:block">Category<select class="h-cat" style="width:100%">'+opts+'</select></label>'+
@@ -1930,7 +2017,7 @@ function habPanel(h){
       '<button data-act="hemoji" data-e="" aria-pressed="'+(cur==='')+'" aria-label="No icon">—</button></div></div>'+
     '<div class="fl" style="align-items:flex-start">Colour<div class="swatches" style="flex:1">'+
       HUES2.map(function(x){return '<button class="swatch" data-act="hhue" data-n="'+x+'" style="--sh:'+x+'" aria-pressed="'+(h.hue!=null&&nearestHue(hue)===x)+'" aria-label="Hue '+x+'"></button>'}).join('')+
-      '<button class="swatch" data-act="hhue" data-n="" aria-pressed="'+(h.hue==null)+'" style="--sh:'+catOf(h.cat).hue+';opacity:.5" aria-label="Match category"></button></div></div>'+
+      '<button class="swatch" data-act="hhue" data-n="" aria-pressed="'+(h.hue==null)+'" style="--sh:'+hcatOf(h.cat).hue+';opacity:.5" aria-label="Match category"></button></div></div>'+
     '<div class="fl">Show as<div class="seg" role="group" aria-label="Chart">'+
       [['grid','Grid'],['bars','Bars'],['line','Line']].map(function(v){
         return '<button data-act="hview" data-v="'+v[0]+'" aria-pressed="'+((h.view||'grid')===v[0])+'">'+v[1]+'</button>'}).join('')+'</div></div>'+
@@ -2071,7 +2158,7 @@ function catBlock(c,map,depth){
 PAGES.tasks=function(){
   var all=arr(tasks), open=all.filter(function(t){return !t.done}), done=all.filter(function(t){return t.done});
   var late=function(t){return (t.plan&&t.plan<today)||(t.due&&t.due<today)};
-  var now=function(t){return t.plan===today||(t.due&&t.due===today)||late(t)};
+  var now=function(t){return t.plan===today||(t.due&&t.due===today)||late(t)||t.ongoing};
   var tdy=open.filter(now);
   var TABS=[['today','Today',tdy.length],['lists','Lists',open.length],['archive','Done',done.length]];
   var h=exNote()+'<div class="tabs2" role="group" aria-label="View">'+TABS.map(function(t){
@@ -2080,7 +2167,8 @@ PAGES.tasks=function(){
 
   if(tab==='today'){
     var over=tdy.filter(late), due=tdy.filter(function(t){return !late(t)});
-    if(!tdy.length) h+='<p class="empty">\u2600\ufe0f Nothing on today \u2014 pull something over from Lists</p>';
+    h+='<form class="addform today" id="todayform"><input id="ntd" placeholder="Something for today\u2026" aria-label="New task for today" autocomplete="off" enterkeyhint="done"><button>Add</button></form>';
+    if(!tdy.length) h+='<p class="empty">\u2600\ufe0f Nothing on today yet</p>';
     /* trees, so an indented step folds under its parent here too */
     if(over.length) h+=sec('Overdue',over.length,'warn')+
       '<ul class="tasks">'+treeFor(over,over).map(function(r){
@@ -2765,6 +2853,7 @@ function listDrag(e,sel,hostSel,commit,forced){
   var others=items.filter(function(x){return x!==el});
   if(!others.length) return;
   var startY=e.clientY, rect=el.getBoundingClientRect(), before=null;
+  var lastX=e.clientX, lastY=e.clientY;
   el.classList.add('lifted'); setLock(true);
   var line=document.createElement('div');
   line.className='dmark ordline';
@@ -2773,6 +2862,7 @@ function listDrag(e,sel,hostSel,commit,forced){
   var move=function(ev){
     /* without this the browser treats the drag as a scroll and cancels the pointer */
     if(ev.cancelable) ev.preventDefault();
+    lastX=ev.clientX; lastY=ev.clientY;
     el.style.transform='translateY('+(ev.clientY-startY)+'px)';
     before=null;
     for(var i=0;i<others.length;i++){
@@ -2786,10 +2876,15 @@ function listDrag(e,sel,hostSel,commit,forced){
     document.removeEventListener('pointerup',up);
     document.removeEventListener('pointercancel',up);
     setLock(false); line.remove();
+    /* what is underneath, with the dragged card taken out of the way */
+    el.style.visibility='hidden';
+    var under=document.elementFromPoint(lastX,lastY);
+    el.style.visibility='';
     el.classList.remove('lifted'); el.style.transform='';
     var order=others.slice();
     order.splice(before?order.indexOf(before):order.length,0,el);
-    commit(order.map(function(x){return x.dataset.cat!=null?x.dataset.cat:x.dataset.id}));
+    commit(order.map(function(x){return x.dataset.cat!=null?x.dataset.cat:x.dataset.id}),
+           under&&under.closest?under.closest('[data-hcat]'):null);
     paint();
   };
   document.addEventListener('pointermove',move);
@@ -2874,8 +2969,12 @@ document.addEventListener('pointerdown',function(e){
       var fresh=document.querySelector('.hcard[data-id="'+hid+'"]');
       if(!fresh) return;
       fresh.classList.remove('big');
-      listDrag(ev,'.hcard[data-id]','#view',function(ids){
+      listDrag(ev,'.hcard[data-id]','#view',function(ids,host){
         ids.forEach(function(x,i){ editHabit(x,function(hh){hh.hord=i}) });
+        if(host&&host.dataset.hcat!=null){
+          var nc=host.dataset.hcat;
+          editHabit(hid,function(hh){ if(hh.cat!==nc) hh.cat=nc });
+        }
       },fresh);
     };
     var hu=function(){
@@ -3075,6 +3174,51 @@ document.addEventListener('pointerup',endItemDrag,true);
 document.addEventListener('pointercancel',function(){ if(idrag) clearDrag() },true);
 
 
+/* the title is edited where it sits: Enter or tapping away commits it */
+function commitInlineTitle(){
+  var i=document.querySelector('.t-inline'); if(!i||!editingId) return;
+  var id=editingId, v=i.value.trim();
+  editingId=null;
+  if(v&&tasks[id]&&v!==tasks[id].title) editTask(id,function(t){t.title=v}); else paint();
+}
+document.addEventListener('keydown',function(e){
+  if(!editingId) return;
+  if(e.key==='Enter'){ e.preventDefault(); commitInlineTitle() }
+  else if(e.key==='Escape'){ editingId=null; paint() }
+});
+document.addEventListener('focusout',function(e){
+  if(editingId&&e.target.classList&&e.target.classList.contains('t-inline')) setTimeout(commitInlineTitle,60);
+});
+
+/* ---------- a left swipe on a task row shows what you can do with it ---------- */
+document.addEventListener('pointerdown',function(e){
+  if(page!=='tasks'||modal) return;
+  var row=e.target.closest&&e.target.closest('li.task[data-id]');
+  if(!row){ if(swipedId){ swipedId=null; paint() } return }
+  if(e.target.closest('.swax')) return;
+  var x0=e.clientX, y0=e.clientY, id=row.dataset.id, on=false, dx=0;
+  var move=function(ev){
+    dx=ev.clientX-x0;
+    if(!on){
+      if(Math.abs(dx)<14||Math.abs(ev.clientY-y0)>Math.abs(dx)) return;
+      on=true; cancelLongPress(); setLock(true); row.classList.add('swiping');
+    }
+    if(ev.cancelable) ev.preventDefault();
+    row.style.setProperty('--sw',Math.max(-132,Math.min(0,dx))+'px');
+  };
+  var up=function(){
+    document.removeEventListener('pointermove',move);
+    document.removeEventListener('pointerup',up);
+    document.removeEventListener('pointercancel',up);
+    if(!on) return;
+    setLock(false); row.classList.remove('swiping'); row.style.removeProperty('--sw');
+    swipedId=(dx<-52)?id:null; confirmDel=null; paint();
+  };
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',up);
+  document.addEventListener('pointercancel',up);
+},true);
+
 /* ---------- paint ---------- */
 function paint(){
   var el=$('#list'); if(!el) return;
@@ -3169,6 +3313,20 @@ view.addEventListener('submit',function(e){
       ord:firstOrd(null,ncat),created:Date.now(),example:false});
     ti.value=''; refocus='#nt';
   }
+  else if(id==='todayform'){
+    var td=$('#ntd'), tv2=td.value.trim(); if(!tv2) return;
+    var pq2=parseQuick(tv2);
+    putTask({id:uid(),title:pq2.title,cat:resolveCat(pq2.cat)||'',due:pq2.due||null,plan:today,block:null,
+      prio:pq2.prio,done:false,doneAt:null,subs:[],repeat:null,parent:null,
+      ord:firstOrd(null,resolveCat(pq2.cat)||''),created:Date.now(),example:false});
+    td.value=''; refocus='#ntd'; return;
+  }
+  else if(id==='hcatform'){
+    var hi=$('#newhcat'), hn=hi.value.trim(); if(!hn) return;
+    seedHcats();
+    set.hcats.push({id:'hc'+Date.now().toString(36),name:hn,hue:HUES2[set.hcats.length%HUES2.length]});
+    putSet(); hi.value=''; refocus='#newhcat'; return;
+  }
   else if(id==='catform'){
     var i=$('#newcat'), n=i.value.trim(); if(!n) return;
     var used=cats().map(function(c){return c.hue}), hue=HUES.filter(function(x){return used.indexOf(x)<0})[0]||HUES[cats().length%HUES.length];
@@ -3212,6 +3370,8 @@ view.addEventListener('click',function(e){
       if(t.done&&t.repeat&&t.repeat.type&&!t.spawned){t.spawned=true; setTimeout(function(){spawnNext(t)},0)}});
   }
   else if(act==='open'){openId=openId===id?null:id; confirmDel=null; paint()}
+  else if(act==='rename'){ editingId=id; swipedId=null; refocus='.t-inline'; paint() }
+  else if(act==='ongoing') editTask(id,function(t){t.ongoing=!t.ongoing});
   else if(act==='plan') editTask(id,function(t){t.plan=t.plan===today?null:today});
   else if(act==='totoday') editTask(id,function(t){t.plan=today; if(t.due&&t.due<today) t.due=today; t.rolls=0});
   else if(act==='notoday') editTask(id,function(t){t.plan=null; t.block=null});
@@ -3288,6 +3448,14 @@ view.addEventListener('click',function(e){
   }
   else if(act==='look'){ set.look=b.dataset.l; putSet(); applyTheme(); }
   else if(act==='mode'){ theme=b.dataset.m; store('lp.theme',theme); applyTheme(); paint(); }
+  else if(act==='hcatedit'){ editHcats=!editHcats; paint() }
+  else if(act==='hcathue'){ seedHcats();
+    var hc=b.dataset.c; set.hcats.forEach(function(c){ if(c.id===hc) c.hue=+b.dataset.x }); putSet() }
+  else if(act==='hcatdel'){ seedHcats();
+    var dc=b.dataset.c;
+    set.hcats=set.hcats.filter(function(c){return c.id!==dc});
+    arr(habits).forEach(function(x){ if(x.cat===dc) editHabit(x.id,function(hh){hh.cat=''}) });
+    putSet() }
   else if(act==='hview') editHabit(id,function(x){x.view=b.dataset.v});
   else if(act==='hsched') editHabit(id,function(h){h.sched.type=b.dataset.s; if(b.dataset.s==='days'&&!(h.sched.days||[]).length) h.sched.days=[1,3,5]});
   else if(act==='hday') editHabit(id,function(h){var d=+b.dataset.d,a=h.sched.days||[];h.sched.days=a.indexOf(d)>=0?a.filter(function(x){return x!==d}):a.concat([d]).sort()});
@@ -3379,6 +3547,10 @@ view.addEventListener('change',function(e){
     else if(c.contains('f-due')) editTask(id,function(t){t.due=e.target.value||null});
     else if(c.contains('h-title')){var hv=e.target.value.trim(); if(hv) editHabit(id,function(h){h.title=hv}); else paint()}
     else if(c.contains('h-cat')) editHabit(id,function(h){h.cat=e.target.value});
+    else if(c.contains('hc-name')){
+      var row=e.target.closest('.hcrow'); if(row){ seedHcats();
+        set.hcats.forEach(function(x){ if(x.id===row.dataset.hc) x.name=e.target.value.trim()||x.name });
+        putSet() } }
     else if(c.contains('h-blk')) editHabit(id,function(h){h.block=e.target.value||null});
     else if(c.contains('h-per')) editHabit(id,function(h){h.sched.per=Math.max(1,Math.min(7,+e.target.value||1))});
     else if(c.contains('h-goal')) editHabit(id,function(h){h.goal=Math.max(1,Math.min(7,+e.target.value||1))});
