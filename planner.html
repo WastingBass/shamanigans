@@ -599,18 +599,19 @@ li.task.justdone .t{animation:strike .4s ease both}
 @media (max-width:899px){.hours,.wcol,.wgut{--gut:56px}.hr{font-size:11.5px;padding-left:6px}.blk .bedit{opacity:.75}}
 
 .itm{position:absolute;left:0;right:0;pointer-events:auto;border-radius:7px;padding:1px 6px 1px 3px;overflow:hidden;cursor:pointer;background-clip:padding-box;
-  background:hsl(var(--h,200) var(--itm-s) var(--itm-l) / .86);
-  border:1px solid hsl(var(--h,200) var(--itm-s) var(--itm-bd-l) / .7);
+  background:hsl(var(--h,200) var(--itm-s) var(--itm-l) / .68);
+  border:1.5px solid hsl(var(--h,200) var(--itm-s) var(--itm-bd-l) / .95);
   color:hsl(var(--h,200) 55% var(--itm-fg-l));font-size:10px;font-weight:600;line-height:1.3;min-height:14px;
-  display:flex;align-items:center;gap:5px}
-.itm .ic{width:13px;height:13px;border-radius:50%;border:1.6px solid currentColor;flex:none;opacity:.75;display:block}
+  /* everything rides at the top: a two-hour card should not float its tick in the middle */
+  display:flex;align-items:flex-start;gap:5px;padding-top:3px}
+.itm .ic{width:13px;height:13px;border-radius:50%;border:1.6px solid currentColor;flex:none;opacity:.75;display:block;margin-top:1px}
 .itm .ic.on{background:currentColor}
 .itm.done{opacity:.55;text-decoration:line-through}
 .itm .iw{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;align-self:flex-start}
-.itm .ix{font-weight:400;opacity:.85;font-variant-numeric:tabular-nums;flex:none}
+.itm .ix{font-weight:400;opacity:.85;font-variant-numeric:tabular-nums;flex:none;align-self:flex-start}
 .itm .rz{position:absolute;left:0;right:0;bottom:0;height:min(13px,28%);cursor:ns-resize}
 .itm .rzt{position:absolute;left:0;right:0;top:0;height:min(11px,24%);cursor:ns-resize}
-.itm .iedit{flex:none;width:18px;text-align:center;opacity:.6;font-size:13px;line-height:1;position:relative;z-index:2}
+.itm .iedit{flex:none;width:18px;text-align:center;opacity:.6;font-size:13px;line-height:1;position:relative;z-index:2;align-self:flex-start}
 .itm .rz::after{content:"";position:absolute;left:50%;bottom:3px;width:22px;height:2.5px;margin-left:-11px;border-radius:9px;background:currentColor;opacity:.6}
 .hours.dropok{outline:2px dashed var(--accent);outline-offset:-2px;border-radius:10px}
 .sec.dropok{color:var(--accent)}
@@ -1361,6 +1362,7 @@ function rowHTML(t,o){
     (o.plan?'<span class="swax" aria-hidden="'+(swipedId!==t.id)+'">'+
        '<button data-act="pickdue" title="Pick a date">'+CALICO+'</button>'+
        '<button data-act="ongoing" class="'+(t.ongoing?'on':'')+'" title="Ongoing">\u21ba</button>'+
+       ((t.due||t.plan)?'<button data-act="cleardate" title="Clear the date">\u2298</button>':'')+
        '<button data-act="delete" class="del" title="Delete">'+(confirmDel===t.id?'Sure?':'\u2715')+'</button></span>':'')+
     (open?panelHTML(t):'')+'</li>';
 }
@@ -1730,7 +1732,7 @@ PAGES.cal=function(){
   if(phone){
     /* one bar instead of three rows: every pixel saved is calendar */
     h=(pickDue&&tasks[pickDue]?'<div class="pickbar"><span>Pick a day for \u201c'+esc(tasks[pickDue].title)+'\u201d</span>'+
-        '<button data-act="pickcancel">Cancel</button></div>':'')+
+        '<button data-act="pickclear">No date</button><button data-act="pickcancel">Cancel</button></div>':'')+
       '<div class="calbar">'+
       '<button class="nv" data-act="calmove" data-n="-1" aria-label="Previous">‹</button>'+
       '<div class="mid">'+esc(mid)+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'+
@@ -3222,12 +3224,15 @@ document.addEventListener('pointerdown',function(e){
 /* ---------- paint ---------- */
 function paint(){
   var el=$('#list'); if(!el) return;
+  /* innerHTML throws the grid's scroll away; put the reader back where they were */
+  var oldg=$('.gscroll'), keepTop=oldg?oldg.scrollTop:null;
   el.innerHTML=!ready?'<p class="empty">Loading…</p>':PAGES[page]();
   if(refocus){var f=$(refocus); if(f) f.focus(); refocus=null}
   sizeGrid(); wireGrid(); paintPins();
   if(page==='cal'&&ready){
     var ck=calView+'|'+calDate;
     if(centredKey!==ck){centredKey=ck; centreGrid()}
+    else if(keepTop!=null){ var g2=$('.gscroll'); if(g2) g2.scrollTop=keepTop }
   }
   var dm=$('.devbar .dmsg');
   if(dm&&!devArm) dm.textContent=notesCount()+' note'+(notesCount()===1?'':'s');
@@ -3372,6 +3377,7 @@ view.addEventListener('click',function(e){
   else if(act==='open'){openId=openId===id?null:id; confirmDel=null; paint()}
   else if(act==='rename'){ editingId=id; swipedId=null; refocus='.t-inline'; paint() }
   else if(act==='ongoing') editTask(id,function(t){t.ongoing=!t.ongoing});
+  else if(act==='cleardate'){ swipedId=null; editTask(id,function(t){t.due=null; t.plan=null; t.rolls=0}) }
   else if(act==='plan') editTask(id,function(t){t.plan=t.plan===today?null:today});
   else if(act==='totoday') editTask(id,function(t){t.plan=today; if(t.due&&t.due<today) t.due=today; t.rolls=0});
   else if(act==='notoday') editTask(id,function(t){t.plan=null; t.block=null});
@@ -3492,6 +3498,12 @@ view.addEventListener('click',function(e){
     calDate=(tasks[id]&&tasks[id].due)||today; centredKey=null; page='cal'; showPage();
   }
   else if(act==='pickcancel'){ pickDue=null; page='tasks'; showPage() }
+  else if(act==='pickclear'){
+    var pc=pickDue; pickDue=null;
+    /* clear every reason this task is being held on a day */
+    if(pc) editTask(pc,function(t){t.due=null; t.plan=null; t.rolls=0});
+    page='tasks'; showPage();
+  }
   else if(act==='drawer'){showDrawer=!showDrawer; picked=null; paint()}
   else if(act==='newblk') openModal('block',{});
   else if(act==='pick'){

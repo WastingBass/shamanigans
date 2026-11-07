@@ -1,5 +1,5 @@
-/* Shamanigans service worker — build 20261107-1509-2eb5adc2 */
-var BUILD = '20261107-1509-2eb5adc2';
+/* Shamanigans service worker — build 20261107-1537-816c4729 */
+var BUILD = '20261107-1537-816c4729';
 var SHELL = 'shell-' + BUILD;
 var RUNTIME = 'runtime-' + BUILD;
 var ASSETS = ['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png',
