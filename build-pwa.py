@@ -17,7 +17,7 @@ HEAD = """<meta charset="utf-8">
 <meta name="apple-mobile-web-app-title" content="Shamanigans">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#F2F5F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101614" media="(prefers-color-scheme: dark)">
@@ -28,6 +28,7 @@ HEAD = """<meta charset="utf-8">
 """
 
 SW_REG = """<script>
+window.__BUILD='%BUILD%';
 /* service worker: the app shell is cached, so it opens with no signal */
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
@@ -46,7 +47,7 @@ out = src.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "
 anchor = "<title>Shamanigans</title>\n"
 assert out.count(anchor) == 1, "title anchor missing"
 out = out.replace(anchor, anchor + HEAD)
-out = out.rstrip() + "\n" + SW_REG
+out = out.rstrip() + "\n" + SW_REG.replace("%BUILD%", build)
 (dist / "index.html").write_text(out, encoding="utf-8")
 
 manifest = {

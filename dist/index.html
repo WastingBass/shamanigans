@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Shamanigans">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#F2F5F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101614" media="(prefers-color-scheme: dark)">
@@ -297,6 +297,10 @@ h1{margin:0;font:700 23px/1.1 var(--display);letter-spacing:-.01em;text-wrap:bal
 .tabs2{display:flex;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:2px;margin:0 0 6px;gap:2px}
 .tabs2 button{flex:1;text-align:center;padding:6px 4px;border-radius:7px;font-weight:500;color:var(--muted);font-size:12px}
 .tabs2 button[aria-pressed="true"]{background:var(--soft);color:var(--fg);font-weight:600}
+.tabs2 .tn{display:inline-block;min-width:15px;padding:0 3px;border-radius:5px;background:var(--bg);
+  font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;vertical-align:1px}
+.tabs2 button[aria-pressed="true"] .tn{background:var(--accent);color:var(--accent-fg)}
+.sec.warn .l{color:var(--warn)}
 ul{list-style:none;margin:0;padding:0}
 
 /* task + habit rows */
@@ -352,6 +356,12 @@ ul{list-style:none;margin:0;padding:0}
 .todo.on::before{background:currentColor;border-color:currentColor}
 .rdots{width:22px;height:26px;flex:none;display:grid;place-items:center;color:var(--muted);font-size:15px;line-height:1}
 .body.flat{padding:4px 4px 4px 0;display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+/* phone: the title gets the line, the details sit under it rather than running
+   off the edge behind the buttons */
+@media (max-width:899px){
+  .body.flat{flex-direction:column;align-items:flex-start;gap:1px;padding:6px 4px 6px 0}
+  .body.flat .t,.body.flat .meta{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
 .panel.slim{padding:10px 12px 12px}
 .cated{padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 8px;
   display:flex;flex-direction:column;gap:9px}
@@ -368,8 +378,17 @@ ul{list-style:none;margin:0;padding:0}
 .done .chk::before{animation:tickPop .32s cubic-bezier(.2,.8,.3,1.4)}
 @keyframes tickPop{0%{transform:scale(.6)}60%{transform:scale(1.22)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.burst{display:none}.done .chk::before{animation:none}}
-.ordline{position:absolute;left:8px;right:8px;height:2px;background:var(--accent);border-radius:2px;z-index:8;pointer-events:none}
+#durtag{position:fixed;z-index:60;pointer-events:none;background:var(--accent);color:var(--accent-fg);
+  font:700 12px var(--body);font-variant-numeric:tabular-nums;padding:3px 7px;border-radius:7px;
+  box-shadow:0 2px 8px rgba(0,0,0,.22)}
+.ordline{position:absolute;left:8px;right:8px;height:2px;background:var(--accent);border-radius:2px;z-index:8;pointer-events:none;
+  transition:top .13s cubic-bezier(.4,0,.2,1),left .13s cubic-bezier(.4,0,.2,1)}
 .ordline.ind{left:36px}
+li.task.settle{animation:settle .34s cubic-bezier(.33,1,.68,1)}
+@keyframes settle{
+  0%{background:color-mix(in srgb,var(--accent) 22%,transparent);transform:scale(.985)}
+  100%{background:transparent;transform:none}}
+@media (prefers-reduced-motion:reduce){li.task.settle{animation:none}}
 .ordline::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
 .subs li{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center}
 .subs .chk{width:36px;height:38px}
@@ -401,8 +420,11 @@ ul{list-style:none;margin:0;padding:0}
   height:var(--sheet,210px);min-height:96px;overflow:hidden;padding:0;margin-top:6px;
   background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .calside.sheet .sgrab{height:28px;width:100%;flex:none;display:grid;place-items:center;cursor:ns-resize;touch-action:none}
-.calside.sheet.shut{height:34px;min-height:0}
-.calside.sheet.shut .sgrab i{width:52px;background:var(--accent);opacity:.5}
+.calside.sheet{transition:opacity .12s}
+.calside.sheet.going{opacity:.45}
+.calside.sheet.going .sgrab i{background:var(--warn)}
+.stabs .sclose{margin-left:auto;width:26px;height:26px;flex:none;display:grid;place-items:center;
+  font-size:17px;line-height:1;color:var(--muted);border-radius:7px}
 .calside.sheet .sgrab i{width:40px;height:5px;border-radius:3px;background:var(--line);display:block}
 .calside.sheet.rz .sgrab i{background:var(--accent)}
 .stabs{display:flex;gap:4px;padding:2px 8px 7px;flex:none}
@@ -442,6 +464,8 @@ ul{list-style:none;margin:0;padding:0}
   :root[data-pg="cal"] body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   :root[data-pg="cal"] .top{position:absolute;top:0;right:12px;margin:0;min-height:0;z-index:7}
   :root[data-pg="cal"] .top .eyebrow,:root[data-pg="cal"] .top h1{display:none}
+  /* settings and the theme switch live in Settings, not over the grid */
+  :root[data-pg="cal"] .top .tools{display:none}
   :root[data-pg="cal"] .wrap{position:relative}
   :root[data-pg="cal"] .devbar{margin:2px 12px 0}
   :root[data-pg="cal"] .calbar{padding-left:12px;padding-right:84px}
@@ -470,7 +494,8 @@ ul{list-style:none;margin:0;padding:0}
 .hours{position:relative}
 .hr{position:absolute;left:0;right:0;z-index:1;pointer-events:none;font-size:11px;color:var(--muted);padding-left:5px;font-variant-numeric:tabular-nums}
 .hr::after{content:"";position:absolute;left:var(--gut,112px);right:0;top:0;border-top:1px solid var(--line)}
-.hr span{position:relative;top:1px;display:inline-block;line-height:1.1}
+/* the label is centred ON its own rule, the way a calendar reads */
+.hr span{position:relative;top:0;display:inline-block;line-height:1.1;transform:translateY(-50%)}
 .tight .hr.odd span{display:none}
 .shade{position:absolute;left:0;right:0;background:var(--shade);pointer-events:none;z-index:0}
 .now{position:absolute;left:0;right:0;border-top:2px solid var(--warn);z-index:5;pointer-events:none}
@@ -492,6 +517,8 @@ ul{list-style:none;margin:0;padding:0}
     repeating-linear-gradient(180deg,var(--bc) 0 3px,transparent 3px 5px) top left/1.4px 100% no-repeat,
     repeating-linear-gradient(180deg,var(--bc) 0 3px,transparent 3px 5px) top right/1.4px 100% no-repeat}
 .blk.ghost::before{display:none}
+.blk.locked .rz,.blk.locked .rzt{display:none}
+.blk.locked::after{content:"\1f512";position:absolute;left:3px;bottom:0;font-size:8px;line-height:1;opacity:.72;pointer-events:none}
 
 .blk ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;min-height:0;overflow:hidden}
 .blk li{font-size:10.5px;display:flex;gap:4px;align-items:center;color:var(--fg);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -546,6 +573,12 @@ body.dragging{cursor:grabbing}
 body.dragging *{cursor:grabbing!important}
 /* a generous landing zone: the whole category group catches the drop */
 .catgroup{border-radius:12px;transition:background .12s,box-shadow .12s;padding:2px;margin:0 -2px}
+.ctw{width:18px;height:18px;flex:none;display:grid;place-items:center;color:var(--muted);margin-left:-2px}
+.ctw::before{content:"";width:5px;height:5px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;
+  transform:rotate(-45deg);transition:transform .14s ease}
+.ctw.open::before{transform:rotate(45deg)}
+.allfold{display:flex;justify-content:flex-end;margin:-2px 0 6px}
+.allfold button{font:600 11.5px var(--body);color:var(--muted);padding:3px 8px;border-radius:7px;background:var(--soft)}
 .catgroup.dropok{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
 .catgroup.dropok .sec{color:var(--accent)}
 .hours.dropok{outline:2px dashed var(--accent)!important;outline-offset:-3px}
@@ -595,6 +628,23 @@ body.dragging *{cursor:grabbing!important}
 .hcard.off{opacity:.55}
 .hcard .hc1{display:flex;align-items:center;gap:9px}
 .hcard .em{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:15px;flex:none}
+/* phone: a habit is one slim line, so the whole set is on screen at once */
+@media (max-width:899px){
+  /* collapsed: title, count, tick and the week on one slim line.
+     Hold the card (habBig) and it opens out to the full stats again. */
+  .hcard:not(.big){border-radius:11px;padding:5px 9px;gap:0;flex-direction:row;align-items:center}
+  .hcard:not(.big) .hc1{gap:7px;flex:1;min-width:0}
+  .hcard:not(.big) .em{width:20px;height:20px;border-radius:6px;font-size:12px}
+  .hcard:not(.big) .ht{font-size:12.5px}
+  .hcard:not(.big) .hv{font-size:11px}
+  .hcard:not(.big) .tick2{width:21px;height:21px;border-width:1.7px}
+  .hcard:not(.big) .dots{width:18px}
+  .hcard:not(.big) .hfoot{display:none}
+  .hcard:not(.big) .wkstrip{flex:none;margin-left:8px;gap:3px;grid-template-columns:repeat(7,10px)}
+  .hcard:not(.big) .wkstrip i{height:10px;border-radius:3px}
+  .hcard:not(.big) .wkstrip i b{display:none}
+  .hcard:not(.big) .wkstrip i.td{outline-width:1.5px;outline-offset:0}
+}
 .hcard .ht{font:700 14px var(--body);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hcard .hv{font:700 13px var(--body);font-variant-numeric:tabular-nums;opacity:.95;white-space:nowrap}
 .hcard .tick2{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.75);flex:none;background:transparent}
@@ -751,7 +801,7 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:
   padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5}
 nav div{max-width:740px;margin:0 auto;display:flex}
-nav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;font-size:10px;font-weight:500;color:var(--muted);border-radius:9px}
+nav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;font-size:10px;font-weight:500;color:var(--muted);border-radius:9px;touch-action:none}
 nav button svg{width:18px;height:18px}
 nav button[aria-current="page"]{color:var(--accent);font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1063,13 +1113,22 @@ var set={cats:DEFAULT_CATS.slice(),windows:clone(DEFAULT_WIN),trips:[],cap:3,loo
 var ready=false, db=null, readOnly=false, chains={};
 var PAGELIST=['today','cal','habits','tasks','more','goals','rewards','track','settings','notes'];
 var page=store('lp.page')||'cal'; if(page==='plan'||page==='dash') page='cal'; if(PAGELIST.indexOf(page)<0) page='cal';
-var tab='todo', habTab='build', calView=store('lp.calview')||'day', calDate=today;
+var tab=store('lp.tasktab')||'today', habTab='build', calView=store('lp.calview')||'day', calDate=today;
 var openId=null, confirmDel=null, refocus=null, picked=null, modal=null, showDrawer=true, addingCat=null, addingHab=null, catEdit=null;
 var habBig={}; try{habBig=JSON.parse(store('lp.habbig')||'{}')||{}}catch(e){habBig={}}
 var isPhone=function(){return window.innerWidth<900};
 var sheetTab=store('lp.sheettab')||'tasks';
+if(sheetTab!=='tasks'&&sheetTab!=='habits') sheetTab='tasks';   /* rewards and blocks are gone */
 var sheetH=Math.max(96,Math.min(420,+(store('lp.sheeth')||0)||Math.round(Math.min(230,(window.innerHeight||760)*0.26))));
-var sheetOpen=store('lp.sheetopen')!=='0';   /* tap the handle to fold the list away */
+/* the day's list is not part of the calendar: you pull it in from the bar when
+   you want it, and shove it back down when you are done. Off by default, so the
+   grid has the whole screen. */
+var sheetOn=store('lp.sheeton')==='1';
+var SHEET_MIN=112, SHEET_KILL=74;
+function setSheet(on,which){
+  sheetOn=!!on; if(which) sheetTab=which;
+  store('lp.sheeton',sheetOn?'1':'0'); store('lp.sheettab',sheetTab);
+}
 var openCats={}; try{openCats=JSON.parse(store('lp.opencats')||'{}')||{}}catch(e){openCats={}}
 var gridDate=function(){return calDate};
 
@@ -1440,7 +1499,7 @@ function blkHTML(b,date,full,r0,r1){
   var inner = '<button class="bedit" data-act="bedit" data-blk="'+b.id+'" aria-label="Edit '+esc(b.title)+'">⋯</button>'+
     '<span class="rzt" aria-hidden="true"></span><span class="rz" aria-hidden="true"></span>'+
     (full?'':'<div class="bt2">'+esc(b.title)+'</div>');
-  return '<div class="blk" data-blk="'+b.id+'" style="--h:'+c.hue+
+  return '<div class="blk'+(b.lock?' locked':'')+'" data-blk="'+b.id+'" style="--h:'+c.hue+
     ';top:'+pc(s,r0,r1)+'%;height:'+(pc(e,r0,r1)-pc(s,r0,r1))+'%">'+inner+'</div>';
 }
 function itemHTML(t,date,r0,r1){
@@ -1578,9 +1637,11 @@ PAGES.cal=function(){
   if(picked) notes+='<p class="hintline">'+esc(picked.title)+' picked — tap a time</p>';
   if(isPhone())
     return h+'<div class="calwrap phone"><div class="calmain">'+notes+grid+'</div>'+
-      '<aside class="calside sheet'+(sheetOpen?'':' shut')+'" style="--sheet:'+(sheetOpen?sheetH:34)+'px">'+
-        '<button class="sgrab" type="button" aria-expanded="'+sheetOpen+'" aria-label="'+(sheetOpen?'Hide the list, or drag to resize':'Show the list')+'"><i></i></button>'+
-        (sheetOpen?sheetTabs()+'<div class="sbody">'+sheetList()+'</div>':'')+'</aside></div>';
+      (sheetOn
+        ? '<aside class="calside sheet" style="--sheet:'+sheetH+'px">'+
+            '<button class="sgrab" type="button" aria-label="Drag to resize, or down to put it away"><i></i></button>'+
+            sheetTabs()+'<div class="sbody">'+sheetList()+'</div></aside>'
+        : '')+'</div>';
   var slim=(calView==='week'&&store('lp.slim')!=='0');
   return h+'<div class="calwrap"><div class="calmain">'+notes+grid+'</div>'+
     '<aside class="calside'+(slim?' slim':'')+'">'+
@@ -1609,9 +1670,10 @@ function sheetCounts(){
 function sheetTabs(){
   var n=sheetCounts();
   return '<div class="stabs" role="tablist">'+
-    [['tasks','Tasks'],['habits','Habits'],['rewards','Rewards'],['blocks','Blocks']].map(function(t){
+    [['tasks','Tasks'],['habits','Habits']].map(function(t){
       return '<button role="tab" data-act="stab" data-t="'+t[0]+'" aria-selected="'+(sheetTab===t[0])+'">'+
-        esc(t[1])+'<span class="n">'+n[t[0]]+'</span></button>'}).join('')+'</div>';
+        esc(t[1])+'<span class="n">'+n[t[0]]+'</span></button>'}).join('')+
+    '<button class="sclose" data-act="sheetoff" aria-label="Put the list away">\u00d7</button></div>';
 }
 function sheetList(){
   if(sheetTab==='blocks')
@@ -1776,7 +1838,7 @@ function habCard(h){
   var right = h.kind==='build'
     ? '<button class="tick2 '+(done?'on':'')+'" data-act="habtick" aria-label="Done today" aria-pressed="'+done+'"></button>'
     : (slip?'<span class="hv">slipped</span>':'<button class="tick2" data-act="slip" aria-label="Log a slip"></button>');
-  return '<div class="hcard'+(h.active?'':' off')+'" data-id="'+h.id+'" data-kind="habit" style="--h:'+hue+'">'+
+  return '<div class="hcard'+(h.active?'':' off')+(big?' big':'')+'" data-id="'+h.id+'" data-kind="habit" style="--h:'+hue+'">'+
     '<div class="hc1"><span class="em">'+(h.emoji||(h.kind==='build'?'🌱':'🚫'))+'</span>'+
     '<span class="ht">'+esc(h.title)+(h.active?'':' · paused')+'</span>'+
     (val?'<span class="hv">'+val+'</span>':'')+right+
@@ -1850,7 +1912,9 @@ function slimPanel(t){
 /* ---------- task order and nesting (up to two levels under a top task) ---------- */
 var MAXDEPTH=2;
 var subsOpen={}; try{subsOpen=JSON.parse(store('lp.subsopen')||'{}')||{}}catch(e){subsOpen={}}
-var isOpenSub=function(id){return subsOpen[id]!==false};           /* open unless closed */
+var isOpenSub=function(id){return subsOpen[id]!==false};
+var catsOpen={}; try{catsOpen=JSON.parse(store('lp.catsopen')||'{}')||{}}catch(e){catsOpen={}}
+var isCatOpen=function(id){return catsOpen[id]!==false};           /* open unless closed */
 var ordOf=function(t){return typeof t.ord==='number'?t.ord:(t.created||0)};
 var byOrd=function(a,b){return ordOf(a)-ordOf(b)||(a.created||0)-(b.created||0)};
 function kidsOf(id,pool){return (pool||arr(tasks)).filter(function(t){return t.parent===id}).sort(byOrd)}
@@ -1881,7 +1945,10 @@ function renumber(ids){
   });
 }
 function catHead(c,n,depth){
-  return '<h2 class="sec" data-cat="'+esc(c.id)+'"><span class="l"><i class="dot '+(c.none?'none':'')+'" style="--h:'+c.hue+'"></i>'+esc(c.name)+'</span>'+
+  var co=isCatOpen(c.id);
+  return '<h2 class="sec" data-cat="'+esc(c.id)+'"><span class="l">'+
+    '<button class="ctw'+(co?' open':'')+'" data-act="cattw" data-c="'+esc(c.id)+'" aria-expanded="'+co+'" aria-label="'+(co?'Collapse ':'Expand ')+esc(c.name)+'"></button>'+
+    '<i class="dot '+(c.none?'none':'')+'" style="--h:'+c.hue+'"></i>'+esc(c.name)+'</span>'+
     '<span class="rt"><span class="count">'+n+'</span>'+
     (c.none?'':'<button class="addb" data-act="catedit" data-c="'+esc(c.id)+'" aria-label="Edit '+esc(c.name)+'">\u22ef</button>')+
     '<button class="addb" data-act="addin" data-c="'+esc(c.id)+'" aria-label="Add a task to '+esc(c.name)+'">+</button></span></h2>'+
@@ -1914,26 +1981,57 @@ function catBlock(c,map,depth){
   if(!items.length&&!kids.length&&c.none) return '';
   var h='<div class="catgroup" data-cat="'+esc(c.id)+'">'+catHead(c,items.length,depth);
   if(addingCat===c.id) h+='<form class="addform inline" id="taskform" data-c="'+esc(c.id)+'"><input id="nt" placeholder="New task in '+esc(c.name)+'" aria-label="New task" autocomplete="off" enterkeyhint="done"><button>Add</button></form>';
-  var rows=treeFor(items,items);
-  h+=rows.length?'<ul class="tasks">'+rows.map(function(r){
-      return rowHTML(r.t,{grip:1,plan:1,depth:r.depth,kids:r.kids+((r.t.subs||[]).length?1:0)})+subRows(r.t);
-    }).join('')+'</ul>'
-    :'<p class="empty" style="padding:10px">—</p>';
+  if(isCatOpen(c.id)){
+    var rows=treeFor(items,items);
+    h+=rows.length?'<ul class="tasks">'+rows.map(function(r){
+        return rowHTML(r.t,{grip:1,plan:1,depth:r.depth,kids:r.kids+((r.t.subs||[]).length?1:0)})+subRows(r.t);
+      }).join('')+'</ul>'
+      :'<p class="empty" style="padding:10px">—</p>';
+  }
   h+='</div>';
   if(kids.length) h+='<div class="catkid">'+kids.map(function(k){return catBlock(k,map,(depth||0)+1)}).join('')+'</div>';
   return h;
 }
 PAGES.tasks=function(){
   var all=arr(tasks), open=all.filter(function(t){return !t.done}), done=all.filter(function(t){return t.done});
-  var h=exNote()+'<div class="tabs2" role="group" aria-label="View"><button data-act="tab" data-tab="todo" aria-pressed="'+(tab==='todo')+'">To do '+open.length+'</button><button data-act="tab" data-tab="archive" aria-pressed="'+(tab==='archive')+'">Archive '+done.length+'</button></div>';
-  if(tab==='todo'){
+  /* "now" is anything you put on today's plate, plus anything that slipped past it */
+  var late=function(t){return (t.plan&&t.plan<today)||(t.due&&t.due<today)};
+  var now=function(t){return t.plan===today||(t.due&&t.due===today)||late(t)};
+  var tdy=open.filter(now), pipe=open.filter(function(t){return !now(t)});
+  var byTime=function(a,b){
+    var x=a.at==null?9999:a.at, y=b.at==null?9999:b.at;
+    return x-y||(b.prio-a.prio)||(a.created-b.created);
+  };
+  var TABS=[['today','Today',tdy.length],['pipe','Pipeline',pipe.length],
+            ['lists','Lists',null],['archive','Done',done.length]];
+  var h=exNote()+'<div class="tabs2" role="group" aria-label="View">'+TABS.map(function(t){
+    return '<button data-act="tab" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+
+      esc(t[1])+(t[2]==null?'':' <span class="tn">'+t[2]+'</span>')+'</button>'}).join('')+'</div>';
+
+  if(tab==='today'){
+    var over=tdy.filter(late).sort(byDue), due=tdy.filter(function(t){return !late(t)}).sort(byTime);
+    if(!tdy.length) h+='<p class="empty">\u2600\ufe0f Nothing on today \u2014 pull something over from Pipeline</p>';
+    if(over.length) h+=sec('Overdue',over.length,'warn')+list(over,{plan:1,dot:1});
+    if(due.length) h+=sec('Today',due.length)+list(due,{plan:1,dot:1});
+  }
+  else if(tab==='pipe'){
+    if(!pipe.length) h+='<p class="empty">\u2705 Nothing waiting \u2014 the pipeline is clear</p>';
+    else groups(pipe.sort(byDue)).forEach(function(g){
+      h+=sec(g[0].name,g[1].length,'',g[0].hue,g[0].none)+list(g[1],{plan:1});
+    });
+  }
+  else if(tab==='lists'){
+    var anyOpen=cats().some(function(c){return isCatOpen(c.id)})||isCatOpen('');
+    h+='<div class="allfold"><button data-act="catsall">'+(anyOpen?'Collapse all':'Expand all')+'</button></div>';
     var map={}; groups(open.sort(byDue)).forEach(function(g){map[g[0].id]=g[1]});
     cats().filter(function(c){return !c.parent}).forEach(function(c){h+=catBlock(c,map,0)});
     h+=catBlock({id:'',name:'Other',hue:200,none:true},map,0);
     h+='<form class="addform newcat" id="catform"><input id="newcat" placeholder="New category" aria-label="New category" maxlength="30"><button>Add</button></form>';
-  } else {
-    if(!done.length) h+='<p class="empty">—</p>';
-    groups(done.sort(function(a,b){return (b.doneAt||0)-(a.doneAt||0)})).forEach(function(g){h+=sec(g[0].name,g[1].length,'',g[0].hue,g[0].none)+list(g[1],{doneDate:1})});
+  }
+  else {
+    if(!done.length) h+='<p class="empty">\u2014</p>';
+    groups(done.sort(function(a,b){return (b.doneAt||0)-(a.doneAt||0)})).forEach(function(g){
+      h+=sec(g[0].name,g[1].length,'',g[0].hue,g[0].none)+list(g[1],{doneDate:1})});
   }
   return h;
 };
@@ -2165,9 +2263,22 @@ PAGES.settings=function(){
     '<p class="hintline" id="dmsg" style="margin-top:8px">'+countAll()+' items stored'+(db?' \u00b7 synced':' \u00b7 on this device')+'</p></div>';
   h+='<div class="setblk"><h3>How many habits at once</h3><p>A soft limit. Over it, the Habits page says so rather than stopping you.</p>'+
     '<div class="seg" role="group" aria-label="Habit limit">'+[2,3,4,5].map(function(n){return '<button data-act="cap" data-n="'+n+'" aria-pressed="'+((set.cap||3)===n)+'">'+n+'</button>'}).join('')+'</div></div>';
+  h+='<div class="setblk"><h3>Version</h3><p class="hintline" style="font-variant-numeric:tabular-nums">Build '+
+    esc(window.__BUILD||'dev (unbuilt)')+'</p></div>';
   h+='</div>';
   return h;
 };
+
+/* while a card is being stretched, say how long it now is */
+function durTag(x,y,mins){
+  var el=document.getElementById('durtag');
+  if(mins==null){ if(el) el.remove(); return }
+  if(!el){ el=document.createElement('div'); el.id='durtag'; document.body.appendChild(el) }
+  var hh=Math.floor(mins/60), mm=mins%60;
+  el.textContent=hh?(mm?hh+'h '+mm:hh+'h'):mm+'m';
+  el.style.left=Math.max(6,Math.min((window.innerWidth||360)-54,x+14))+'px';
+  el.style.top=Math.max(6,y-34)+'px';
+}
 
 /* a tick deserves a moment: a ring and eight sparks, then gone */
 function celebrate(el){
@@ -2258,8 +2369,19 @@ function drawModal(){
       '<div class="btns"><button class="s" data-act="itmoff">Off the timeline</button>'+
       (m.data.k==='task'?'<button class="s" data-act="itmdone">'+(o.done?'Not done':'Mark done')+'</button>':'')+
       '<button class="p" data-act="itmsave">Save</button></div>';
+  } else if(m.kind==='qtask'){
+    var qc=cats(), qat=m.data.at||0, qmin=m.data.mins||60;
+    body='<h2>New task</h2><p>'+hhmm(qat)+'\u2013'+hhmm(qat+qmin)+' \u00b7 '+longDate(m.data.day||gridDate())+'</p>'+
+      '<label class="fl">What is it<input id="qt" placeholder="e.g. Draft the quote" maxlength="80" autocomplete="off" enterkeyhint="done"></label>'+
+      '<label class="fl">Category<select id="qc">'+qc.map(function(c){
+        return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join('')+'</select></label>'+
+      '<div class="btns"><button class="s" data-act="mclose">Cancel</button>'+
+      '<button class="s" data-act="qtblk">Time block instead</button>'+
+      '<button class="p" data-act="qtsave">Add</button></div>';
   } else if(m.kind==='block'){
     var b=m.data.id?blocks[m.data.id]:null, nb=b||{title:'',cat:cats()[0].id,start:m.data.start||'18:00',end:m.data.end||'19:30',days:[dowOf(m.data.day||gridDate())]};
+    var curDays=m.data.days?m.data.days.slice():(nb.days||[]).slice();
+    var lk=(m.data.lock!=null)?!!m.data.lock:!!(b&&b.lock);
     var opts=cats().map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===nb.cat?' selected':'')+'>'+esc(c.name)+'</option>'}).join('');
     var items=b?arr(tasks).filter(function(t){return t.block===b.id}).length+arr(habits).filter(function(x){return x.block===b.id}).length:0;
     body='<h2>'+(b?'Edit time block':'New time block')+'</h2>'+
@@ -2267,10 +2389,12 @@ function drawModal(){
       '<div class="grid2"><label class="fl">Category<select id="bc">'+opts+'</select></label>'+
       '<label class="fl">&nbsp;<span style="display:flex;gap:6px"><input type="time" id="bs" value="'+esc(nb.start)+'" aria-label="Start"><input type="time" id="be" value="'+esc(nb.end)+'" aria-label="End"></span></label></div>'+
       '<div class="fl">Repeats on<div class="days" role="group" aria-label="Repeats on">'+DOWN.map(function(d,i){
-        return '<button type="button" data-act="bday" data-d="'+i+'" aria-pressed="'+((nb.days||[]).indexOf(i)>=0)+'">'+d+'</button>'}).join('')+'</div></div>'+
+        return '<button type="button" data-act="bday" data-d="'+i+'" aria-pressed="'+(curDays.indexOf(i)>=0)+'">'+d+'</button>'}).join('')+'</div></div>'+
+      '<div class="row2"><button type="button" class="pill" data-act="blklock" aria-pressed="'+lk+'">'+
+        (lk?'\ud83d\udd12 Locked \u2014 cannot be dragged':'\ud83d\udd13 Unlocked \u2014 drag to move or resize')+'</button></div>'+
       '<div class="btns">'+(b?'<button class="s" data-act="blkdel">'+(items?'Delete ('+items+' items freed)':'Delete')+'</button>':'')+
       '<button class="s" data-act="mclose">Cancel</button><button class="p" data-act="blksave">Save</button></div>';
-    modal.data.days=(nb.days||[]).slice();
+    modal.data.days=curDays; modal.data.lock=lk;
   }
   el.innerHTML='<div class="scrim" data-act="mscrim"><div class="modal" role="dialog" aria-modal="true">'+body+'</div></div>';
   var f=$('#slipnote')||$('#notetext')||$('#hvalin')||$('#bt'); if(f) f.focus();
@@ -2396,7 +2520,7 @@ function wireGrid(){
         pid:e.pointerId,y0:e.clientY,m0:snap(minIn(ax,e.clientY)),armed:false,moved:false,cap:false,
         touch:(e.pointerType!=='mouse')};
     if(itm){var o=thing(dr.ik,dr.id); if(!o){dr=null; return} dr.s=o.at; dr.e=o.at+(o.mins||30)}
-    else if(blk){var b=blocks[dr.id]; if(!b){dr=null; return} dr.s=toMin(b.start); dr.e=toMin(b.end)}
+    else if(blk){var b=blocks[dr.id]; if(!b||b.lock){dr=null; return} dr.s=toMin(b.start); dr.e=toMin(b.end)}
     if(e.pointerType==='mouse') arm(); else timer=setTimeout(arm,320);
   });
   g.addEventListener('pointermove',function(e){
@@ -2418,22 +2542,25 @@ function wireGrid(){
     } else if(dr.mode==='resize'){
       var ne=Math.max(dr.s+15,Math.min(R1,dr.e+dm));
       dr.ns=dr.s; dr.ne=ne; put(dr.el,dr.s,ne);
+      durTag(e.clientX,e.clientY,ne-dr.s);
     } else if(dr.mode==='resizeTop'){
       var nst=Math.min(dr.e-15,Math.max(R0,dr.s+dm));
       dr.ns=nst; dr.ne=dr.e; put(dr.el,nst,dr.e);
+      durTag(e.clientX,e.clientY,dr.e-nst);
     } else {
       var cur=snap(minIn(dr.ax,e.clientY)), a=Math.min(dr.m0,cur), z=Math.max(dr.m0,cur);
       if(z-a<15){a=Math.min(a,R1-15); z=a+15}
       dr.ns=a; dr.ne=z;
       if(!ghost){ghost=document.createElement('div'); ghost.className='blk ghost'; ($('.blocks',dr.ax)||dr.ax).appendChild(ghost)}
       put(ghost,a,z); ghost.textContent=hhmm(a)+'–'+hhmm(z);
+      durTag(e.clientX,e.clientY,z-a);
     }
   });
   function end(){
-    var d=dr; dr=null; stop(d);
+    durTag(); var d=dr; dr=null; stop(d);
     if(!d||!d.armed||!d.moved) return;
     suppressClick=true; setTimeout(function(){suppressClick=false},90);
-    if(d.mode==='create'){ openModal('block',{start:hhmm(d.ns),end:hhmm(d.ne),day:d.date}); return }
+    if(d.mode==='create'){ openModal('qtask',{at:d.ns,mins:d.ne-d.ns,day:d.date}); return }
     if(d.kind==='item'){
       editThing(d.ik,d.id,function(o){o.at=d.ns; o.mins=d.ne-d.ns; if(d.ik==='task') o.plan=d.date;
         o.block=blockAt(d.date,d.ns)});
@@ -2450,9 +2577,52 @@ function wireGrid(){
     var ax=axisOf(e.target); if(!ax) return;
     var m=snap(minIn(ax,e.clientY));
     if(picked){ placeAt(picked.kind,picked.id,m,ax.dataset.axis); return }
-    openModal('block',{start:hhmm(m),end:hhmm(Math.min(R1,m+60)),day:ax.dataset.axis});
+    openModal('qtask',{at:m,mins:Math.min(R1,m+60)-m,day:ax.dataset.axis});
   });
 }
+/* ---------- pull the list in from the bar ----------
+   On the calendar, dragging up from Tasks or Habits brings that list in and
+   sizes it under your finger. A plain tap still just changes page. */
+var navDragged=false;
+document.addEventListener('pointerdown',function(e){
+  if(!isPhone()||page!=='cal'||modal||e.button) return;
+  var btn=e.target.closest&&e.target.closest('#bottom button[data-page]');
+  if(!btn) return;
+  var which=btn.dataset.page;
+  if(which!=='tasks'&&which!=='habits') return;
+  var y0=e.clientY, armed=false;
+  navDragged=false;
+  var move=function(ev){
+    var up=y0-ev.clientY;
+    if(!armed){
+      if(up<14) return;
+      armed=true; navDragged=true; setLock(true);
+      try{btn.setPointerCapture(e.pointerId)}catch(x){}
+      setSheet(true,which); buzz(); paint();
+    }
+    sheetH=Math.max(SHEET_MIN,Math.min(Math.round(window.innerHeight*0.62),Math.round(up)));
+    var live=$('.calside.sheet');
+    if(live) live.style.setProperty('--sheet',sheetH+'px');
+    sizeGrid();
+  };
+  var up=function(){
+    document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up);
+    document.removeEventListener('pointercancel',up);
+    setLock(false);
+    if(armed){ store('lp.sheeth',String(sheetH)); setTimeout(function(){navDragged=false},80) }
+  };
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',up);
+  document.addEventListener('pointercancel',up);
+},true);
+/* a drag is not a tap: keep the page from changing underneath it */
+document.addEventListener('click',function(e){
+  if(!navDragged) return;
+  if(e.target.closest&&e.target.closest('#bottom button[data-page]')){
+    e.stopPropagation(); e.preventDefault();
+  }
+},true);
+
 /* ---------- the phone sheet: drag its top edge to trade space with the grid ---------- */
 document.addEventListener('pointerdown',function(e){
   var gb=e.target.closest&&e.target.closest('.sgrab'); if(!gb||e.button) return;
@@ -2461,13 +2631,19 @@ document.addEventListener('pointerdown',function(e){
   var y0=e.clientY, h0=sheet.getBoundingClientRect().height, moved=false;
   sheet.classList.add('rz');
   try{gb.setPointerCapture(e.pointerId)}catch(x){}
+  var raw=h0;
   var move=function(ev){
     if(Math.abs(ev.clientY-y0)>5) moved=true;
     if(!moved) return;
-    if(!sheetOpen){ sheetOpen=true; store('lp.sheetopen','1'); paint(); }
-    var next=Math.max(96,Math.min(Math.round(window.innerHeight*0.62),Math.round(h0+(y0-ev.clientY))));
-    sheetH=next;
-    var live=$('.calside.sheet'); if(live){live.style.setProperty('--sheet',next+'px')}
+    raw=Math.round(h0+(y0-ev.clientY));
+    var next=Math.max(SHEET_KILL-20,Math.min(Math.round(window.innerHeight*0.62),raw));
+    var live=$('.calside.sheet');
+    if(live){
+      live.style.setProperty('--sheet',next+'px');
+      /* dragged most of the way down: show it is about to go */
+      live.classList.toggle('going',raw<SHEET_KILL);
+    }
+    if(raw>=SHEET_KILL) sheetH=Math.max(SHEET_MIN,next);
     sizeGrid();
   };
   var up=function(){
@@ -2476,8 +2652,11 @@ document.addEventListener('pointerdown',function(e){
     document.removeEventListener('pointercancel',up);
     /* the grid resizes under the finger, so swallow the click that follows */
     suppressClick=true; setTimeout(function(){suppressClick=false},260);
-    if(moved){ store('lp.sheeth',String(sheetH)); }
-    else { sheetOpen=!sheetOpen; store('lp.sheetopen',sheetOpen?'1':'0'); paint(); }
+    if(moved){
+      if(raw<SHEET_KILL){ setSheet(false); paint(); buzz(); }
+      else { store('lp.sheeth',String(sheetH)); }
+    }
+    else { setSheet(false); paint(); }
   };
   document.addEventListener('pointermove',move);
   document.addEventListener('pointerup',up);
@@ -2499,12 +2678,15 @@ function dragGhost(x,y,label,hue){
   el.innerHTML='<span class="gd"><i class="dot" style="--h:'+(hue==null?200:hue)+'"></i>'+esc(label)+'</span>';
   el.style.left=x+'px'; el.style.top=y+'px';
 }
+function dropClear(){
+  document.querySelectorAll('.dmark').forEach(function(x){x.remove()});
+}
 function clearDrag(){
   setLock(false); cancelLongPress();
   var el=$('#ghostdrag'); if(el) el.remove();
   document.querySelectorAll('.dropok').forEach(function(n){n.classList.remove('dropok')});
   document.querySelectorAll('.drag-src').forEach(function(n){n.classList.remove('drag-src')});
-  var dl=$('.dropline'); if(dl) dl.remove();
+  dropClear();
   document.body.classList.remove('dragging');
   clearInterval(autoScroll); autoScroll=null;
   idrag=null;
@@ -2608,26 +2790,34 @@ document.addEventListener('pointermove',function(e){
   var t=dropTarget(e.clientX,e.clientY);
   if(gel) gel.style.visibility='';
   idrag.target=t;
-  var line=$('.dropline');
+  /* ONE indicator for the whole drag: found by the class it is created with,
+     moved rather than re-made, so it glides instead of breeding copies */
+  var line=$('.dmark');
+  var mark=function(cls,parent){
+    if(line&&line.parentNode===parent&&line.getAttribute('data-kind')===cls) return line;
+    dropClear();
+    line=document.createElement('div');
+    line.className='dmark '+cls; line.setAttribute('data-kind',cls);
+    parent.appendChild(line); return line;
+  };
   if(t){
     t.el.classList.add('dropok');
     if(t.t==='row'){
-      var rr=t.el.getBoundingClientRect(), host=t.el.closest('ul.tasks');
-      if(!line){line=document.createElement('div'); line.className='ordline'; host.appendChild(line)}
-      line.className='ordline'+(((e.clientX-(idrag.x0||e.clientX))>26)?' ind':'');
-      var hb=host.getBoundingClientRect();
-      line.style.top=((t.before?rr.top:rr.bottom)-hb.top-1)+'px';
-      line.style.position='absolute';
+      var host=t.el.closest('ul.tasks');
       if(getComputedStyle(host).position==='static') host.style.position='relative';
+      var rr=t.el.getBoundingClientRect(), hb=host.getBoundingClientRect();
+      line=mark('ordline',host);
+      line.className='dmark ordline'+(((e.clientX-(idrag.x0||e.clientX))>26)?' ind':'');
+      line.style.top=((t.before?rr.top:rr.bottom)-hb.top-1)+'px';
     } else if(t.t==='time'){
       var r=t.el.getBoundingClientRect(), g=t.el.closest('.gscroll');
       var r0=+g.dataset.r0||0, r1=+g.dataset.r1||1440;
       var m=Math.round((r0+(e.clientY-r.top)/(r.height||1)*(r1-r0))/15)*15;
-      if(!line){line=document.createElement('div'); line.className='dropline'; t.el.appendChild(line)}
+      line=mark('dropline',t.el);
       line.style.top=((m-r0)/(r1-r0)*100)+'%';
       line.setAttribute('data-t',hhmm(Math.max(0,Math.min(1425,m))));
-    } else if(line) line.remove();
-  } else if(line) line.remove();
+    } else dropClear();
+  } else dropClear();
   var vh=window.innerHeight||760;
   clearInterval(autoScroll); autoScroll=null;
   if(e.clientY<90) autoScroll=setInterval(function(){window.scrollBy(0,-14)},16);
@@ -2682,6 +2872,11 @@ function reorderTask(d,t,dx){
     editTask(r.id,function(x){x.parent=pid; x.ord=o; x.cat=groupCat});
   });
   if(newParent) subsOpen[newParent]=true, store('lp.subsopen',JSON.stringify(subsOpen));
+  /* the list has just been rebuilt under us; mark where the row landed */
+  setTimeout(function(){
+    var li=document.querySelector('li.task[data-id="'+d.id+'"]');
+    if(li){ li.classList.add('settle'); setTimeout(function(){li.classList.remove('settle')},360) }
+  },0);
 }
 function endItemDrag(e){
   cancelLongPress();
@@ -2857,7 +3052,7 @@ view.addEventListener('click',function(e){
   else if(act==='subtoggle') editTask(id,function(t){(t.subs||[]).forEach(function(s){if(s.id===sid) s.d=!s.d})});
   else if(act==='subdel') editTask(id,function(t){t.subs=(t.subs||[]).filter(function(s){return s.id!==sid})});
   else if(act==='delete'){ if(confirmDel===id){drop('tasks',tasks,id); openId=null; confirmDel=null} else {confirmDel=id; paint()} }
-  else if(act==='tab'){tab=b.dataset.tab; openId=null; addingCat=null; paint()}
+  else if(act==='tab'){tab=b.dataset.tab; store('lp.tasktab',tab); openId=null; addingCat=null; paint()}
   else if(act==='accord'){
     var k=b.dataset.k, cur=openCats[k]!==undefined?openCats[k]:(k.charAt(0)==='_');
     openCats[k]=!cur; store('lp.opencats',JSON.stringify(openCats)); paint();
@@ -2873,6 +3068,16 @@ view.addEventListener('click',function(e){
   else if(act==='addin'){
     addingCat=addingCat===b.dataset.c?null:b.dataset.c;
     refocus=addingCat!==null?'#nt':null; paint();
+  }
+  else if(act==='blklock'){ modal.data.lock=!modal.data.lock; drawModal(); return }
+  else if(act==='cattw'){
+    var ccid=b.dataset.c||'';
+    catsOpen[ccid]=!isCatOpen(ccid); store('lp.catsopen',JSON.stringify(catsOpen)); paint();
+  }
+  else if(act==='catsall'){
+    var anyOpen=cats().some(function(c){return isCatOpen(c.id)})||isCatOpen('');
+    cats().forEach(function(c){catsOpen[c.id]=!anyOpen}); catsOpen['']=!anyOpen;
+    store('lp.catsopen',JSON.stringify(catsOpen)); paint();
   }
   else if(act==='clearex'){
     arr(tasks).filter(function(x){return x.example}).forEach(function(x){drop('tasks',tasks,x.id)});
@@ -2926,6 +3131,7 @@ view.addEventListener('click',function(e){
   else if(act==='habdel'){ if(confirmDel===id){drop('habits',habits,id); openId=null; confirmDel=null} else {confirmDel=id; paint()} }
   /* calendar */
   else if(act==='stab'){sheetTab=b.dataset.t; store('lp.sheettab',sheetTab); paint()}
+  else if(act==='sheetoff'){ setSheet(false); paint() }
   else if(act==='calview'){calView=b.dataset.v; store('lp.calview',calView); picked=null; centredKey=null; paint()}
   else if(act==='calmove'){var n=+b.dataset.n;
     calDate= calView==='day'?shift(calDate,n): calView==='week'?shift(calDate,7*n)
@@ -3085,12 +3291,25 @@ $('#modal').addEventListener('click',function(e){
     modal.data.days=a.indexOf(d)>=0?a.filter(function(x){return x!==d}):a.concat([d]).sort();
     b.setAttribute('aria-pressed',modal.data.days.indexOf(d)>=0); return;
   }
+  if(act==='qtsave'){
+    var qttl=$('#qt').value.trim(); if(!qttl){ $('#qt').focus(); return }
+    var qcat=$('#qc').value, qd=modal.data.day||gridDate(), qa=modal.data.at||0;
+    putTask({id:uid(),title:qttl,cat:qcat,due:null,plan:qd,block:blockAt(qd,qa),
+      at:qa,mins:modal.data.mins||60,prio:1,done:false,doneAt:null,subs:[],repeat:null,
+      parent:null,ord:nextOrd(null,qcat),created:Date.now(),example:false});
+    closeModal(); return;
+  }
+  if(act==='qtblk'){
+    var ba=modal.data.at||0, bd=modal.data.day;
+    openModal('block',{start:hhmm(ba),end:hhmm(Math.min(1440,ba+(modal.data.mins||60))),day:bd}); return;
+  }
   if(act==='blksave'){
     var t=$('#bt').value.trim(), cat=$('#bc').value, s=$('#bs').value, en=$('#be').value, days=modal.data.days||[];
     if(!s||!en||en<=s){ $('#be').focus(); return }
     if(!t) t=catOf(cat).name;
     var ex=modal.data.id&&blocks[modal.data.id];
-    var b2={id:ex?ex.id:uid(),title:t,cat:cat,start:s,end:en,days:days.length?days:[dowOf(modal.data.day||gridDate())],date:null,example:false};
+    var b2={id:ex?ex.id:uid(),title:t,cat:cat,start:s,end:en,days:days.length?days:[dowOf(modal.data.day||gridDate())],date:null,
+            lock:!!modal.data.lock,example:false};
     putBlock(b2); closeModal(); return;
   }
   if(act==='blkdel'){
@@ -3194,6 +3413,7 @@ showPage();
 })();
 </script>
 <script>
+window.__BUILD='20261107-0912-17591d06';
 /* service worker: the app shell is cached, so it opens with no signal */
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
